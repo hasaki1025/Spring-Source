@@ -145,41 +145,41 @@ public abstract class AnnotationConfigUtils {
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
 	 */
-	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
+	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(//初始化BeanComparator和AutowireCandidateResolver并注册8个注解引导BeanDefinitionHolder
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
-		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
+		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);//如果registry是BeanFactory的实例则返回registry否则通过get方法获取beanFactory
 		if (beanFactory != null) {
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
-				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);//设置Bean顺序比较器
 			}
 			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
-				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());//设置Autowire注解候选者解析器
 			}
 		}
+		//初始化8个注解
+		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);//创建一个BeanDefinitionHolder数组用于存放Bean的描述信息
 
-		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
-
-		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {//BeanFactoryPostProcessor用于@Configuration类的引导处理。
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
-			def.setSource(source);
-			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
+			def.setSource(source);//放置Configuration注解的Bean描述
+			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));//使用registerPostProcessor注册BeanDefinition并包装称BeanDefinitionHolder
 		}
 
-		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {//同上
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
-		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		//检查 JSR-250 支持，如果存在则添加 CommonAnnotationBeanPostProcessor。
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
-		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		// 检查 JPA 支持，如果存在，添加 PersistenceAnnotationBeanPostProcessor。
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {
@@ -196,7 +196,7 @@ public abstract class AnnotationConfigUtils {
 
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
-			def.setSource(source);
+			def.setSource(source);//放置EventListener注解描述
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
 
@@ -212,9 +212,9 @@ public abstract class AnnotationConfigUtils {
 	private static BeanDefinitionHolder registerPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 
-		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		registry.registerBeanDefinition(beanName, definition);
-		return new BeanDefinitionHolder(definition, beanName);
+		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);//设置该Bean的角色信息一共有3种（ROLE_APPLICATION(通常用于用户自定义的Bean)，ROLE_SUPPORT（较大配置的支持部分），ROLE_INFRASTRUCTURE（完全与用户无关，ComponentDefinition内部工作的 bean ））
+		registry.registerBeanDefinition(beanName, definition);//注册
+		return new BeanDefinitionHolder(definition, beanName);//使用BeanDefinitionHolder（包括definition，beanName，Bean别名）包装BeanDefinition
 	}
 
 	@Nullable
@@ -241,24 +241,24 @@ public abstract class AnnotationConfigUtils {
 		}
 		else if (abd.getMetadata() != metadata) {
 			lazy = attributesFor(abd.getMetadata(), Lazy.class);
-			if (lazy != null) {
+			if (lazy != null) {//是否含有懒加载注解
 				abd.setLazyInit(lazy.getBoolean("value"));
 			}
 		}
 
-		if (metadata.isAnnotated(Primary.class.getName())) {
+		if (metadata.isAnnotated(Primary.class.getName())) {//Primary注解代表该类优先注册
 			abd.setPrimary(true);
 		}
-		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);//DependsOn注解可以让我们在某个bean依赖另外一个bean的时候先加载另外一个bean
 		if (dependsOn != null) {
 			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
 
-		AnnotationAttributes role = attributesFor(metadata, Role.class);
+		AnnotationAttributes role = attributesFor(metadata, Role.class);//Role注解：标识Bean的类别
 		if (role != null) {
 			abd.setRole(role.getNumber("value").intValue());
 		}
-		AnnotationAttributes description = attributesFor(metadata, Description.class);
+		AnnotationAttributes description = attributesFor(metadata, Description.class);//为从org.springframework.stereotype.Component或Bean派生的 bean 定义添加文本描述。
 		if (description != null) {
 			abd.setDescription(description.getString("value"));
 		}

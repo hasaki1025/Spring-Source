@@ -48,8 +48,8 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 
 
 	protected AbstractTypeHierarchyTraversingFilter(boolean considerInherited, boolean considerInterfaces) {
-		this.considerInherited = considerInherited;
-		this.considerInterfaces = considerInterfaces;
+		this.considerInherited = considerInherited;//是否含有Inherited注解
+		this.considerInterfaces = considerInterfaces;//是否继承于接口
 	}
 
 

@@ -39,10 +39,10 @@ import org.springframework.util.ResourceUtils;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
  */
-public interface ResourceLoader {
+public interface ResourceLoader {//加载资源文件的类
 
 	/** Pseudo URL prefix for loading from the class path: "classpath:". */
-	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
+	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;//某些资源文件路径前含有classpath:,之后将会去除
 
 
 	/**

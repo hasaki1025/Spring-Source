@@ -60,8 +60,8 @@ public final class SpringProperties {
 		try {
 			ClassLoader cl = SpringProperties.class.getClassLoader();
 			URL url = (cl != null ? cl.getResource(PROPERTIES_RESOURCE_LOCATION) :
-					ClassLoader.getSystemResource(PROPERTIES_RESOURCE_LOCATION));
-			if (url != null) {
+					ClassLoader.getSystemResource(PROPERTIES_RESOURCE_LOCATION));//如果classloader不为空则从该classloader获取资源否则通过静态方法获取系统的资源（获取名称为spring.properties的资源）
+			if (url != null) {//如果资源不为空则将其中的值读取到localProperties
 				try (InputStream is = url.openStream()) {
 					localProperties.load(is);
 				}
@@ -73,17 +73,17 @@ public final class SpringProperties {
 	}
 
 
-	private SpringProperties() {
+	private SpringProperties() {//单例模式
 	}
 
 
 	/**
-	 * Programmatically set a local property, overriding an entry in the
+	 * 以编程方式设置本地属性，覆盖 {@code spring.properties} 文件中的条目（如果有）
 	 * {@code spring.properties} file (if any).
 	 * @param key the property key
 	 * @param value the associated property value, or {@code null} to reset it
 	 */
-	public static void setProperty(String key, @Nullable String value) {
+	public static void setProperty(String key, @Nullable String value) {//设置property，如果value为空则代表删除该值
 		if (value != null) {
 			localProperties.setProperty(key, value);
 		}
@@ -93,7 +93,7 @@ public final class SpringProperties {
 	}
 
 	/**
-	 * Retrieve the property value for the given key, checking local Spring
+	 * 检索给定键的属性值，首先检查本地 Spring 属性并回退到 JVM 级别的系统属性。
 	 * properties first and falling back to JVM-level system properties.
 	 * @param key the property key
 	 * @return the associated property value, or {@code null} if none found
@@ -101,7 +101,7 @@ public final class SpringProperties {
 	@Nullable
 	public static String getProperty(String key) {
 		String value = localProperties.getProperty(key);
-		if (value == null) {
+		if (value == null) {//如果localProperties中没有则从系统中获取
 			try {
 				value = System.getProperty(key);
 			}
@@ -113,16 +113,16 @@ public final class SpringProperties {
 	}
 
 	/**
-	 * Programmatically set a local flag to "true", overriding an
+	 * 以编程方式将本地标志设置为“true”，覆盖 {@code spring.properties} 文件（如果有）中的条目
 	 * entry in the {@code spring.properties} file (if any).
 	 * @param key the property key
 	 */
-	public static void setFlag(String key) {
+	public static void setFlag(String key) {//设置一个flag，默认为true
 		localProperties.put(key, Boolean.TRUE.toString());
 	}
 
 	/**
-	 * Retrieve the flag for the given property key.
+	 * 检索给定属性键的标志
 	 * @param key the property key
 	 * @return {@code true} if the property is set to "true",
 	 * {@code} false otherwise
