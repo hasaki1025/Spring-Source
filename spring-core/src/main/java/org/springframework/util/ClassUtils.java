@@ -249,14 +249,14 @@ public abstract class ClassUtils {
 
 		Class<?> clazz = resolvePrimitiveClassName(name);
 		if (clazz == null) {
-			clazz = commonClassCache.get(name);
+			clazz = commonClassCache.get(name);//commonClassCache是一个Map集合其中保存了常用的类全路径名和类的Class
 		}
 		if (clazz != null) {
 			return clazz;
 		}
 
 		// "java.lang.String[]" style arrays
-		if (name.endsWith(ARRAY_SUFFIX)) {
+		if (name.endsWith(ARRAY_SUFFIX)) {//如果是数组类型则去除掉[]并递归一次
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
 			Class<?> elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
@@ -284,12 +284,12 @@ public abstract class ClassUtils {
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {
-			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
+			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);//找到最后一个"."的索引
 			if (lastDotIndex != -1) {
 				String nestedClassName =
-						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
+						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);//nestedClassName=包名+$+类名称
 				try {
-					return Class.forName(nestedClassName, false, clToUse);
+					return Class.forName(nestedClassName, false, clToUse);//再次尝试
 				}
 				catch (ClassNotFoundException ex2) {
 					// Swallow - let original exception get through

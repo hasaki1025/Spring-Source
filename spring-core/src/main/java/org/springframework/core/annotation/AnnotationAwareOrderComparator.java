@@ -44,7 +44,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.core.annotation.Order
  * @see javax.annotation.Priority
  */
-public class AnnotationAwareOrderComparator extends OrderComparator {
+public class AnnotationAwareOrderComparator extends OrderComparator {//Bean优先级比较器（注解版）
 
 	/**
 	 * Shared default instance of {@code AnnotationAwareOrderComparator}.

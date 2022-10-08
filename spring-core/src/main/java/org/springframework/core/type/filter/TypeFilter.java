@@ -31,7 +31,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
  * @since 2.5
  */
 @FunctionalInterface
-public interface TypeFilter {
+public interface TypeFilter {//判断某个类上是否含有某个注解的工具类
 
 	/**
 	 * Determine whether this filter matches for the class described by

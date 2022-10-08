@@ -94,7 +94,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
-	private final List<TypeFilter> includeFilters = new ArrayList<>();
+	private final List<TypeFilter> includeFilters = new ArrayList<>();//TypeFilter是判断某个类上是否含有指定的注解的类，includeFilters中包含所有需要判断的注解
 
 	private final List<TypeFilter> excludeFilters = new ArrayList<>();
 
@@ -204,11 +204,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
-		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
-		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
+		this.includeFilters.add(new AnnotationTypeFilter(Component.class));//在includeFilters中添加Component注解，代表需要扫描带有Component注解的类
+		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();//获取当前类的ClassLoader
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
+					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));//添加ManagedBean注解
 			logger.trace("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
@@ -216,7 +216,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));
+					((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));//添加Named注解
 			logger.trace("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {

@@ -39,7 +39,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Internal class used to evaluate {@link Conditional} annotations.
+ * 用于评估 {@link Conditional} 注释的内部类。
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
@@ -47,7 +47,7 @@ import org.springframework.util.MultiValueMap;
  */
 class ConditionEvaluator {
 
-	private final ConditionContextImpl context;
+	private final ConditionContextImpl context;//包含获取BeanDefinitionRegistry，获取环境，获取beanFactory,获取classLoader，获取ResourceLoader方法
 
 
 	/**
@@ -148,24 +148,24 @@ class ConditionEvaluator {
 				@Nullable Environment environment, @Nullable ResourceLoader resourceLoader) {
 
 			this.registry = registry;
-			this.beanFactory = deduceBeanFactory(registry);
-			this.environment = (environment != null ? environment : deduceEnvironment(registry));
-			this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry));
-			this.classLoader = deduceClassLoader(resourceLoader, this.beanFactory);
+			this.beanFactory = deduceBeanFactory(registry);//根据registry的继承结果获取BeanFactory（如果是ApplicationContext类型则通过getBeanFactory获取Bean工厂）
+			this.environment = (environment != null ? environment : deduceEnvironment(registry));//如果registry继承了EnvironmentCapable则获取registry的环境否则创建一个新的环境
+			this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry));//同上
+			this.classLoader = deduceClassLoader(resourceLoader, this.beanFactory);//获取resourceLoader或者beanFactory中的ClassLoader（resourceLoader优先级更高）
 		}
 
 		@Nullable
 		private ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof ConfigurableListableBeanFactory) {
+			if (source instanceof ConfigurableListableBeanFactory) {//如果BeanDefinitionRegistry source是ConfigurableListableBeanFactory的则直接强制转换类型并返回source
 				return (ConfigurableListableBeanFactory) source;
 			}
-			if (source instanceof ConfigurableApplicationContext) {
+			if (source instanceof ConfigurableApplicationContext) {//如果是ConfigurableApplicationContext的实例则通过get方法返回BeanFactory否则返回空的BeanFactory
 				return (((ConfigurableApplicationContext) source).getBeanFactory());
 			}
 			return null;
 		}
 
-		private Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {
+		private Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {//根据source类型返回对应的环境
 			if (source instanceof EnvironmentCapable) {
 				return ((EnvironmentCapable) source).getEnvironment();
 			}
@@ -183,13 +183,13 @@ class ConditionEvaluator {
 		private ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
 				@Nullable ConfigurableListableBeanFactory beanFactory) {
 
-			if (resourceLoader != null) {
-				ClassLoader classLoader = resourceLoader.getClassLoader();
+			if (resourceLoader != null) {//如果resourceLoader不为空
+				ClassLoader classLoader = resourceLoader.getClassLoader();//获取ResourceLoader中的ClassLoader
 				if (classLoader != null) {
 					return classLoader;
 				}
 			}
-			if (beanFactory != null) {
+			if (beanFactory != null) {//如果BeanFactory不为空
 				return beanFactory.getBeanClassLoader();
 			}
 			return ClassUtils.getDefaultClassLoader();

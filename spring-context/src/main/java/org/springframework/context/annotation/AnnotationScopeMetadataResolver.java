@@ -38,9 +38,9 @@ import org.springframework.util.Assert;
  */
 public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
-	private final ScopedProxyMode defaultProxyMode;
+	private final ScopedProxyMode defaultProxyMode;//枚举类，代表动态代理类型，包括DEFAULT，NO（不采用动态代理），INTERFACES（使用JDK动态代理），TARGET_CLASS（使用CGLlib动态代理），DEFAULT默认是No也就是不采用动态代理
 
-	protected Class<? extends Annotation> scopeAnnotationType = Scope.class;
+	protected Class<? extends Annotation> scopeAnnotationType = Scope.class;//指定作用域的注解
 
 
 	/**
@@ -50,7 +50,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	 */
 	public AnnotationScopeMetadataResolver() {
 		this.defaultProxyMode = ScopedProxyMode.NO;
-	}
+	}//默认采用No
 
 	/**
 	 * Construct a new {@code AnnotationScopeMetadataResolver} using the

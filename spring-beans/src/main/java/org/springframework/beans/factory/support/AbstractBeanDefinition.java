@@ -1113,13 +1113,13 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
-		if (hasMethodOverrides() && getFactoryMethodName() != null) {
-			throw new BeanDefinitionValidationException(
+		if (hasMethodOverrides() && getFactoryMethodName() != null) {//FactoryMethodName：当使用自定义一个工厂类时，该工厂产生指定Bean的静态方法就是FactoryMethod可以在XML文件中的Bean标签上指定，指定后如果想要从容器中获取该工厂产生的Bean，Spring就会调用该方法
+			throw new BeanDefinitionValidationException(//这里要求工厂类不能含有重载方法
 					"Cannot combine factory method with container-generated method overrides: " +
 					"the factory method must create the concrete bean instance.");
 		}
 		if (hasBeanClass()) {
-			prepareMethodOverrides();
+			prepareMethodOverrides();//对所用重载方法校验
 		}
 	}
 
@@ -1130,7 +1130,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exist and determine their overloaded status.
-		if (hasMethodOverrides()) {
+		if (hasMethodOverrides()) {//对所有重载方法校验（该名称的方法要大于0，如果等于一则会设置为非重载方法）
 			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}
 	}
@@ -1143,14 +1143,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
-		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
+		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());//获取同名方法数量
 		if (count == 0) {
 			throw new BeanDefinitionValidationException(
 					"Invalid method override: no method with name '" + mo.getMethodName() +
 					"' on class [" + getBeanClassName() + "]");
 		}
 		else if (count == 1) {
-			// Mark override as not overloaded, to avoid the overhead of arg type checking.
+			// 将覆盖标记为未重载，以避免 arg 类型检查的开销。
 			mo.setOverloaded(false);
 		}
 	}

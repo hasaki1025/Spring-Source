@@ -164,13 +164,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
 	 * <p>The default is "false".
 	 */
-	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
+	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");//从SpringProperties中获取spring.spel.ignore的值（true或者false）
 
 
 	static {
-		// Eagerly load the ContextClosedEvent class to avoid weird classloader issues
+		// 急切地加载 ContextClosedEvent 类以避免在 WebLogic 8.1 中关闭应用程序时出现奇怪的类加载器问题。
 		// on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
-		ContextClosedEvent.class.getName();
+		ContextClosedEvent.class.getName();//获取ContextClosedEvent的class类
 	}
 
 
@@ -332,10 +332,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Override
 	public ConfigurableEnvironment getEnvironment() {
-		if (this.environment == null) {
+		if (this.environment == null) {//如果当前环境为空则创建环境（直接new StandardEnvironment）
 			this.environment = createEnvironment();
 		}
-		return this.environment;
+		return this.environment;//返回内部环境
 	}
 
 	/**
@@ -546,10 +546,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
-			// Prepare this context for refreshing.
+			// 准备此上下文以进行刷新。
 			prepareRefresh();
 
-			// Tell the subclass to refresh the internal bean factory.
+			// 告诉子类刷新内部 bean 工厂。
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -621,8 +621,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.closed.set(false);
 		this.active.set(true);
 
-		if (logger.isDebugEnabled()) {
-			if (logger.isTraceEnabled()) {
+		if (logger.isDebugEnabled()) {//是否开启Debug级别
+			if (logger.isTraceEnabled()) {//是否开启Trace级别
 				logger.trace("Refreshing " + this);
 			}
 			else {
@@ -630,7 +630,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 
-		// Initialize any placeholder property sources in the context environment.
+		// 初始化上下文环境中的任何占位符属性源。
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
@@ -658,7 +658,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources
 	 */
 	protected void initPropertySources() {
-		// For subclasses: do nothing by default.
+		// 对于子类：默认情况下什么都不做。
 	}
 
 	/**
