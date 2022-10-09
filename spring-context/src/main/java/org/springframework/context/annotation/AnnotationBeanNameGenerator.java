@@ -78,14 +78,14 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		if (definition instanceof AnnotatedBeanDefinition) {
+		if (definition instanceof AnnotatedBeanDefinition) {//如果是注解类BeanDefinition
 			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
-			if (StringUtils.hasText(beanName)) {
-				// Explicit bean name found.
+			if (StringUtils.hasText(beanName)) {//如果String不为null 、长度大于 0 且包含至少一个非空白字符，则此方法返回true
+				// 返回显式 bean 名称。
 				return beanName;
 			}
 		}
-		// Fallback: generate a unique default bean name.
+		// Fallback：生成唯一的默认 bean 名称。(对简单类名做驼峰命名)
 		return buildDefaultBeanName(definition, registry);
 	}
 
@@ -97,25 +97,25 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata amd = annotatedDef.getMetadata();
-		Set<String> types = amd.getAnnotationTypes();
+		Set<String> types = amd.getAnnotationTypes();//获取该Bean所有注解的类型
 		String beanName = null;
-		for (String type : types) {
-			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
+		for (String type : types) {//遍历所有注解
+			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);//获取该注解的所有属性
 			if (attributes != null) {
 				Set<String> metaTypes = this.metaAnnotationTypesCache.computeIfAbsent(type, key -> {
-					Set<String> result = amd.getMetaAnnotationTypes(key);
+					Set<String> result = amd.getMetaAnnotationTypes(key);//获取所有属性值
 					return (result.isEmpty() ? Collections.emptySet() : result);
-				});
+				});//Map<String, Set<String>> metaAnnotationTypesCache用于存放注解名称和该注解的所有属性名称
 				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
-					Object value = attributes.get("value");
+					Object value = attributes.get("value");//获取value属性值
 					if (value instanceof String) {
 						String strVal = (String) value;
-						if (StringUtils.hasLength(strVal)) {
-							if (beanName != null && !strVal.equals(beanName)) {
+						if (StringUtils.hasLength(strVal)) {//如果strVal不为空字符串且不为空
+							if (beanName != null && !strVal.equals(beanName)) {//如果指定了beanName的同时也指定了注解上的value值且这两值不同泽抛出异常
 								throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
 										"component names: '" + beanName + "' versus '" + strVal + "'");
 							}
-							beanName = strVal;
+							beanName = strVal;//beanName为value
 						}
 					}
 				}
@@ -133,14 +133,14 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * @return whether the annotation qualifies as a stereotype with component name
 	 */
 	protected boolean isStereotypeWithNameValue(String annotationType,
-			Set<String> metaAnnotationTypes, @Nullable Map<String, Object> attributes) {
+			Set<String> metaAnnotationTypes, @Nullable Map<String, Object> attributes) {//annotationType是注解类型，metaAnnotationTypes该注解上的元注解，attributes是注解属性和其值的对应
+		//isStereotype用于判断该注解是否是特殊注解
+		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||//是否是component注解
+				metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||//元注解中是否包含component注解
+				annotationType.equals("javax.annotation.ManagedBean") ||//是否是ManagedBean注解
+				annotationType.equals("javax.inject.Named");//是否是Named注解
 
-		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||
-				metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME) ||
-				annotationType.equals("javax.annotation.ManagedBean") ||
-				annotationType.equals("javax.inject.Named");
-
-		return (isStereotype && attributes != null && attributes.containsKey("value"));
+		return (isStereotype && attributes != null && attributes.containsKey("value"));//要求属性Map不能为空且包含value属性且为特殊注解
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		String beanClassName = definition.getBeanClassName();
 		Assert.state(beanClassName != null, "No bean class name set");
 		String shortClassName = ClassUtils.getShortName(beanClassName);
-		return Introspector.decapitalize(shortClassName);
+		return Introspector.decapitalize(shortClassName);//获取字符串并将其转换为普通 Java 变量名大写的实用方法。这通常意味着将第一个字符从大写转换为小写，但是在（不寻常的）特殊情况下，当有多个字符并且第一个和第二个字符都是大写时，我们不理会它
 	}
 
 }

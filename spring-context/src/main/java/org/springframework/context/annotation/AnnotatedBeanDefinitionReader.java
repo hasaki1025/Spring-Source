@@ -250,18 +250,18 @@ public class AnnotatedBeanDefinitionReader {
 			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
 			@Nullable BeanDefinitionCustomizer[] customizers) {
 
-		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
+		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);//创建beanClass的BeanDefinition
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {//判断该Bean是否可以不加载，如果beanClass上有Conditional注解则不能跳过
 			return;
 		}
 
-		abd.setInstanceSupplier(supplier);
-		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
-		abd.setScope(scopeMetadata.getScopeName());
+		abd.setInstanceSupplier(supplier);//设置Bean回调
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);//解析Bean的作用域
+		abd.setScope(scopeMetadata.getScopeName());//设置作用域
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
-		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);//检查特殊注解
-		if (qualifiers != null) {
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);//检查特殊元注解
+		if (qualifiers != null) {//检查除了 bean 类级别的限定符之外，要考虑的特定限定符注释（如果有）
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {//是否有Primary注解
 					abd.setPrimary(true);
@@ -274,15 +274,15 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
-		if (customizers != null) {
+		if (customizers != null) {//用于定制工厂的BeanDefinition的一个或多个回调，例如设置惰性初始化或主标志
 			for (BeanDefinitionCustomizer customizer : customizers) {
 				customizer.customize(abd);
 			}
 		}
 
-		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);//创建BeanDefinitionHolder
-		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
-		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);//注册该Bean
+		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);//创建BeanDefinitionHolder包装BeanDefinitionHoldere
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);//应用范围代理模式
+		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);//注册该BeanDefinition
 	}
 
 
