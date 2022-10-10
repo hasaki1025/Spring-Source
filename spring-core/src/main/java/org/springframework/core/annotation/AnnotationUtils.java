@@ -164,10 +164,10 @@ public abstract class AnnotationUtils {
 	 * @see #isCandidateClass(Class, Class)
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
-		if (annotationName.startsWith("java.")) {
+		if (annotationName.startsWith("java.")) {//java内置注解
 			return true;
 		}
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
+		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {//是Order注解或者是java内置的注解
 			return false;
 		}
 		return true;

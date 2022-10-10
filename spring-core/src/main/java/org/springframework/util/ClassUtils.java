@@ -908,10 +908,10 @@ public abstract class ClassUtils {
 	 * @return the user-defined class
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
-		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {//该class是否是CGlib代理对象
 			Class<?> superclass = clazz.getSuperclass();
 			if (superclass != null && superclass != Object.class) {
-				return superclass;
+				return superclass;//如果是代理对象则返回父类ClASS
 			}
 		}
 		return clazz;

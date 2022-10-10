@@ -258,21 +258,21 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
-		// Let's check for lookup methods here...
-		if (!this.lookupMethodsChecked.contains(beanName)) {
-			if (AnnotationUtils.isCandidateClass(beanClass, Lookup.class)) {
+		//让我们在这里检查LookUp方法...
+		if (!this.lookupMethodsChecked.contains(beanName)) {//已被检查的LookUp方法中是否含有该Bean
+			if (AnnotationUtils.isCandidateClass(beanClass, Lookup.class)) {//isCandidateClass：用于查看指定注解下的类是否是需要注入的类
 				try {
 					Class<?> targetClass = beanClass;
-					do {
-						ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+					do {//对targetClass中的每一个方法都执行提供回调接口方法
+						ReflectionUtils.doWithLocalMethods(targetClass, method -> {//寻找带有Lookup注解的方法
 							Lookup lookup = method.getAnnotation(Lookup.class);
 							if (lookup != null) {
 								Assert.state(this.beanFactory != null, "No BeanFactory available");
-								LookupOverride override = new LookupOverride(method, lookup.value());
+								LookupOverride override = new LookupOverride(method, lookup.value());//LookupOverride:包含BeanName和LookUp的方法名
 								try {
 									RootBeanDefinition mbd = (RootBeanDefinition)
 											this.beanFactory.getMergedBeanDefinition(beanName);
-									mbd.getMethodOverrides().addOverride(override);
+									mbd.getMethodOverrides().addOverride(override);//添加重写方法
 								}
 								catch (NoSuchBeanDefinitionException ex) {
 									throw new BeanCreationException(beanName,
@@ -280,9 +280,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 								}
 							}
 						});
-						targetClass = targetClass.getSuperclass();
+						targetClass = targetClass.getSuperclass();//获取父类Class
 					}
-					while (targetClass != null && targetClass != Object.class);
+					while (targetClass != null && targetClass != Object.class);//从BeanClass一路向上遍历（遍历父类直到到达Object）
 
 				}
 				catch (IllegalStateException ex) {
@@ -292,14 +292,14 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			this.lookupMethodsChecked.add(beanName);
 		}
 
-		// Quick check on the concurrent map first, with minimal locking.
-		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
+		// 首先快速检查并发映射，锁定最少。
+		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);//从缓存中获取对应的构造方法
 		if (candidateConstructors == null) {
-			// Fully synchronized resolution now...
+			// 现在完全同步分辨率...
 			synchronized (this.candidateConstructorsCache) {
 				candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 				if (candidateConstructors == null) {
-					Constructor<?>[] rawCandidates;
+					Constructor<?>[] rawCandidates;//原生原生候选者（直接获取BeanClass中的构造方法）
 					try {
 						rawCandidates = beanClass.getDeclaredConstructors();
 					}
@@ -308,41 +308,41 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 								"Resolution of declared constructors on bean Class [" + beanClass.getName() +
 								"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 					}
-					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
+					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);//构造方法候选者
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
-					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
+					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);//与Kotlint有关
 					int nonSyntheticConstructors = 0;
 					for (Constructor<?> candidate : rawCandidates) {
-						if (!candidate.isSynthetic()) {
+						if (!candidate.isSynthetic()) {//检查该构造器创建的类是否是合成类（自定义的类）
 							nonSyntheticConstructors++;
 						}
 						else if (primaryConstructor != null) {
 							continue;
 						}
-						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);
-						if (ann == null) {
-							Class<?> userClass = ClassUtils.getUserClass(beanClass);
-							if (userClass != beanClass) {
+						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);//从该方法上找到autowire注解或者value注解，Spring中构造方法调用优先级为：带@Autowired的有参构造方法 > 不带@Autowired的有参构造方法  > 无参构造方法，具体参考https://blog.csdn.net/qq_41426990/article/details/119928396
+						if (ann == null) {//如果找不到带有Autowire注解的构造方法
+							Class<?> userClass = ClassUtils.getUserClass(beanClass);//获取原始Class（如果是代理对象则返回其父类Class）
+							if (userClass != beanClass) {//说明是代理对象
 								try {
 									Constructor<?> superCtor =
 											userClass.getDeclaredConstructor(candidate.getParameterTypes());
-									ann = findAutowiredAnnotation(superCtor);
+									ann = findAutowiredAnnotation(superCtor);//从父类的构造方法上获取Autowire的候选者
 								}
 								catch (NoSuchMethodException ex) {
 									// Simply proceed, no equivalent superclass constructor found...
 								}
 							}
 						}
-						if (ann != null) {
-							if (requiredConstructor != null) {
+						if (ann != null) {//如果含有带有Autowire注解的构造方法
+							if (requiredConstructor != null) {// TODO
 								throw new BeanCreationException(beanName,
 										"Invalid autowire-marked constructor: " + candidate +
 										". Found constructor with 'required' Autowired annotation already: " +
 										requiredConstructor);
 							}
-							boolean required = determineRequiredStatus(ann);
-							if (required) {
+							boolean required = determineRequiredStatus(ann);//确定带注解的字段或方法是否需要其依赖项。“必需”依赖意味着当没有找到 bean 时自动装配会失败。否则，当没有找到 bean 时，自动装配过程将简单地绕过字段或方法
+							if (required) {// TODO
 								if (!candidates.isEmpty()) {
 									throw new BeanCreationException(beanName,
 											"Invalid autowire-marked constructors: " + candidates +
@@ -354,11 +354,11 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 							candidates.add(candidate);
 						}
 						else if (candidate.getParameterCount() == 0) {
-							defaultConstructor = candidate;
+							defaultConstructor = candidate;//默认构造方法为无参构造方法
 						}
 					}
-					if (!candidates.isEmpty()) {
-						// Add default constructor to list of optional constructors, as fallback.
+					if (!candidates.isEmpty()) {//有备选的构造方法
+						// 将默认构造函数添加到可选构造函数列表中，作为后备
 						if (requiredConstructor == null) {
 							if (defaultConstructor != null) {
 								candidates.add(defaultConstructor);
@@ -372,7 +372,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 						candidateConstructors = candidates.toArray(new Constructor<?>[0]);
 					}
-					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
+					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {//如果只有一个有参构造方法则将该构造方法作为备选构造方法
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
 					}
 					else if (nonSyntheticConstructors == 2 && primaryConstructor != null &&
@@ -385,7 +385,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					else {
 						candidateConstructors = new Constructor<?>[0];
 					}
-					this.candidateConstructorsCache.put(beanClass, candidateConstructors);
+					this.candidateConstructorsCache.put(beanClass, candidateConstructors);//把备选构造方法集合放入缓存中
 				}
 			}
 		}
@@ -519,10 +519,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	@Nullable
 	private MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject ao) {
-		MergedAnnotations annotations = MergedAnnotations.from(ao);
-		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+		MergedAnnotations annotations = MergedAnnotations.from(ao);//创建一个MergedAnnotations保证ao上的所有注解
+		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {//autowiredAnnotationTypes：需要autowire的注解，一共两个：value和autowire
 			MergedAnnotation<?> annotation = annotations.get(type);
-			if (annotation.isPresent()) {
+			if (annotation.isPresent()) {//是否存在该注解
 				return annotation;
 			}
 		}

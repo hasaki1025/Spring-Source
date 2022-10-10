@@ -296,7 +296,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@code MergedAnnotations} instance containing the element's
 	 * annotations
 	 */
-	static MergedAnnotations from(AnnotatedElement element) {
+	static MergedAnnotations from(AnnotatedElement element) {//创建一个新的MergedAnnotations实例，其中包含来自指定元素的所有注解和元注解
 		return from(element, SearchStrategy.DIRECT);
 	}
 

@@ -196,19 +196,19 @@ public abstract class BeanUtils {
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
-				Class<?>[] parameterTypes = ctor.getParameterTypes();
+				Class<?>[] parameterTypes = ctor.getParameterTypes();//获取参数列表
 				Assert.isTrue(args.length <= parameterTypes.length, "Can't specify more arguments than constructor parameters");
-				Object[] argsWithDefaultValues = new Object[args.length];
+				Object[] argsWithDefaultValues = new Object[args.length];//构造方法参数默认值数组
 				for (int i = 0 ; i < args.length; i++) {
 					if (args[i] == null) {
 						Class<?> parameterType = parameterTypes[i];
-						argsWithDefaultValues[i] = (parameterType.isPrimitive() ? DEFAULT_TYPE_VALUES.get(parameterType) : null);
+						argsWithDefaultValues[i] = (parameterType.isPrimitive() ? DEFAULT_TYPE_VALUES.get(parameterType) : null);//该参数类型是否是基本类型，如果是则采用基本类型的默认值否则使用null作为默认值
 					}
 					else {
 						argsWithDefaultValues[i] = args[i];
 					}
 				}
-				return ctor.newInstance(argsWithDefaultValues);
+				return ctor.newInstance(argsWithDefaultValues);//构造实例对象并返回
 			}
 		}
 		catch (InstantiationException ex) {
