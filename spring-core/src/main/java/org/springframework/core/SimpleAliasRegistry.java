@@ -212,13 +212,13 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		// Handle aliasing...
 		String resolvedName;
 		do {
-			resolvedName = this.aliasMap.get(canonicalName);
+			resolvedName = this.aliasMap.get(canonicalName);//从别名map获取到真实名称
 			if (resolvedName != null) {
 				canonicalName = resolvedName;
 			}
 		}
-		while (resolvedName != null);
-		return canonicalName;
+		while (resolvedName != null);//防止有多个别名
+		return canonicalName;//返回真实名称
 	}
 
 }

@@ -177,23 +177,23 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @return the registered singleton object, or {@code null} if none found
 	 */
 	@Nullable
-	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-		// Quick check for existing instance without full singleton lock
-		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
-			singletonObject = this.earlySingletonObjects.get(beanName);
-			if (singletonObject == null && allowEarlyReference) {
+	protected Object getSingleton(String beanName, boolean allowEarlyReference) {//返回在给定名称下注册的（原始）单例对象。检查已经实例化的单例，还允许对当前创建的单例进行早期引用（解决循环引用）
+		// 快速检查没有完整单例锁的现有实例
+		Object singletonObject = this.singletonObjects.get(beanName);//singletonObjects是一个线程安全Map用于存放单例Bean和实例对象
+		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {//检查当前正在创建的 bean 的名称中是否含有该bean
+			singletonObject = this.earlySingletonObjects.get(beanName);//从早期单例集合中获取
+			if (singletonObject == null && allowEarlyReference) {//上下文判断是否允许早期引用
 				synchronized (this.singletonObjects) {
-					// Consistent creation of early reference within full singleton lock
+					// 在完整的单例锁中一致地创建早期引用
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
-							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-							if (singletonFactory != null) {
+							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);//假设该Bean是Bean工厂并从单例工厂缓存中获取该Bean
+							if (singletonFactory != null) {//如果不为空则通过该工厂类创建指定的类并放入早期引用单例集合中
 								singletonObject = singletonFactory.getObject();
 								this.earlySingletonObjects.put(beanName, singletonObject);
-								this.singletonFactories.remove(beanName);
+								this.singletonFactories.remove(beanName);//移除该工厂类
 							}
 						}
 					}
