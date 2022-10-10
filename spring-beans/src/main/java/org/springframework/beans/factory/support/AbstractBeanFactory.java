@@ -534,15 +534,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected boolean isTypeMatch(String name, ResolvableType typeToMatch, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException {
 
-		String beanName = transformedBeanName(name);
-		boolean isFactoryDereference = BeanFactoryUtils.isFactoryDereference(name);
+		String beanName = transformedBeanName(name);//获取类全路径名称
+		boolean isFactoryDereference = BeanFactoryUtils.isFactoryDereference(name);//该BeanFactory类全路径名称是否以&开头
 
-		// Check manually registered singletons.
-		Object beanInstance = getSingleton(beanName, false);
+		// 检查手动注册的单例。
+		Object beanInstance = getSingleton(beanName, false);//获取该BeanFactory
 		if (beanInstance != null && beanInstance.getClass() != NullBean.class) {
 			if (beanInstance instanceof FactoryBean) {
 				if (!isFactoryDereference) {
-					Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
+					Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);//确定给定 FactoryBean 的类型。
 					return (type != null && typeToMatch.isAssignableFrom(type));
 				}
 				else {

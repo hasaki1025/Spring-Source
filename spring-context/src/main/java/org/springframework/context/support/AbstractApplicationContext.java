@@ -549,19 +549,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// 准备此上下文以进行刷新。初始化ApplicationListener
 			prepareRefresh();
 
-			// 告诉子类刷新内部 bean 工厂。
+			// 告诉子类刷新内部 bean 工厂。（如果是XML开发该步骤比较重要，XML方式通过该步骤创建BeanFactory）
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			// 准备 bean 工厂以在此上下文中使用。
+			// 准备 bean 工厂以在此上下文中使用。（设置Bean工厂属性,注册SystemEnvironment,Environment,systemproperties 这三个Bean）
 			prepareBeanFactory(beanFactory);
 
 			try {
-				// Allows post-processing of the bean factory in context subclasses.
+				// 允许在上下文子类中对 bean 工厂进行后处理。（暂时这里什么都没有）
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
-				// Invoke factory processors registered as beans in the context.
-				invokeBeanFactoryPostProcessors(beanFactory);
+				//调用在上下文中注册为 bean 的工厂处理器。（如果是注解开发则该步骤比较重要）
+				invokeBeanFactoryPostProcessors(beanFactory);//后置处理器可以在容器外部对容器进行干预（相当于后置通知加强），可以由程序员自己实现并注入
 
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
@@ -579,7 +579,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Check for listener beans and register them.
 				registerListeners();
 
-				// Instantiate all remaining (non-lazy-init) singletons.
+				// 实例化所有剩余的（非惰性初始化）单例。（该步骤比较重要）
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -743,7 +743,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());//调用 Bean Factory 后处理器
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
 		// (e.g. through an @Bean method registered by ConfigurationClassPostProcessor)

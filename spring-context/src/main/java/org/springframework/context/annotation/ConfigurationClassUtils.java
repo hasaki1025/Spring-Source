@@ -82,7 +82,7 @@ abstract class ConfigurationClassUtils {
 	 * @param metadataReaderFactory the current factory in use by the caller
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
-	public static boolean checkConfigurationClassCandidate(
+	public static boolean checkConfigurationClassCandidate(//检查给定的 bean 定义是否是配置类的候选者,metadataReaderFactory – 调用者当前使用的工厂
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 
 		String className = beanDef.getBeanClassName();

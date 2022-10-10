@@ -80,36 +80,36 @@ final class PostProcessorRegistrationDelegate {
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
-			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
-				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
+			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {//遍历Bean工厂后置处理器集合将可作为BeanDefinitionRegistryPostProcessor的BeanFactoryPostProcessor放入registryProcessors中
+				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {//如果该处理器是BeanDefinition注册器后置处理器的实现类则强制转换后放入registryProcessors中
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
-					registryProcessor.postProcessBeanDefinitionRegistry(registry);
+					registryProcessor.postProcessBeanDefinitionRegistry(registry);// 调用后置处理方法（BeanDefinitionRegistryPostProcessor类型的）
 					registryProcessors.add(registryProcessor);
 				}
 				else {
-					regularPostProcessors.add(postProcessor);
+					regularPostProcessors.add(postProcessor);//否则就直接加入regularPostProcessors中
 				}
 			}
 
 			// Do not initialize FactoryBeans here: We need to leave all regular beans
 			// uninitialized to let the bean factory post-processors apply to them!
 			// Separate between BeanDefinitionRegistryPostProcessors that implement
-			// PriorityOrdered, Ordered, and the rest.
+			// PriorityOrdered, Ordered, and the rest.不要在此处初始化 FactoryBeans：我们需要让所有常规 bean 保持未初始化状态，以便 bean 工厂后处理器应用到它们！将实现 PriorityOrdered、Ordered 和其余部分的 BeanDefinitionRegistryPostProcessor 分开。
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
-			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			// 首先，调用实现 PriorityOrdered 的 BeanDefinitionRegistryPostProcessor
 			String[] postProcessorNames =
-					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);//获取BeanDefinitionRegistry的所有的BeanDefinitionRegistryPostProcessor类型的Bean的名称
 			for (String ppName : postProcessorNames) {
-				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
-					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
-					processedBeans.add(ppName);
+				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {//该Bean是否需要排序（根据PriorityOrdered设置注入顺序）
+					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));//向currentRegistryProcessors添加该Bean
+					processedBeans.add(ppName);//添加到processedBeans
 				}
 			}
-			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			sortPostProcessors(currentRegistryProcessors, beanFactory);//排序
 			registryProcessors.addAll(currentRegistryProcessors);
-			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry, beanFactory.getApplicationStartup());
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry, beanFactory.getApplicationStartup());//执行所有后置处理方法
 			currentRegistryProcessors.clear();
 
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
@@ -305,10 +305,10 @@ final class PostProcessorRegistrationDelegate {
 	private static void invokeBeanDefinitionRegistryPostProcessors(
 			Collection<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry, ApplicationStartup applicationStartup) {
 
-		for (BeanDefinitionRegistryPostProcessor postProcessor : postProcessors) {
+		for (BeanDefinitionRegistryPostProcessor postProcessor : postProcessors) {//执行所有后置处理方法
 			StartupStep postProcessBeanDefRegistry = applicationStartup.start("spring.context.beandef-registry.post-process")
 					.tag("postProcessor", postProcessor::toString);
-			postProcessor.postProcessBeanDefinitionRegistry(registry);
+			postProcessor.postProcessBeanDefinitionRegistry(registry);//执行后置处理
 			postProcessBeanDefRegistry.end();
 		}
 	}

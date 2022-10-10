@@ -60,7 +60,7 @@ import org.springframework.beans.BeansException;
  * @see PropertyResourceConfigurer
  */
 @FunctionalInterface
-public interface BeanFactoryPostProcessor {
+public interface BeanFactoryPostProcessor {//可以由程序员自己实现该接口并将其注入到容器中实现对BeanFactory的后置通知增强
 
 	/**
 	 * Modify the application context's internal bean factory after its standard

@@ -167,7 +167,7 @@ class ConfigurationClassParser {
 
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
-		for (BeanDefinitionHolder holder : configCandidates) {
+		for (BeanDefinitionHolder holder : configCandidates) {//遍历集合根据Beandefinition类型解析
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
 				if (bd instanceof AnnotatedBeanDefinition) {
@@ -222,28 +222,28 @@ class ConfigurationClassParser {
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
-		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
+		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {//condition注解解析
 			return;
 		}
 
-		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
-		if (existingClass != null) {
-			if (configClass.isImported()) {
+		ConfigurationClass existingClass = this.configurationClasses.get(configClass);//从configurationClasses获取该配置类的ConfigurationClass
+		if (existingClass != null) {//如果不为空则代表可能从其他地方导入了配置类
+			if (configClass.isImported()) {//是否是import导入的配置类
 				if (existingClass.isImported()) {
-					existingClass.mergeImportedBy(configClass);
+					existingClass.mergeImportedBy(configClass);//添加该配置类
 				}
-				// Otherwise ignore new imported config class; existing non-imported class overrides it.
+				// 否则忽略新导入的配置类；现有的非导入类会覆盖它。
 				return;
 			}
 			else {
-				// Explicit bean definition found, probably replacing an import.
-				// Let's remove the old one and go with the new one.
-				this.configurationClasses.remove(configClass);
-				this.knownSuperclasses.values().removeIf(configClass::equals);
+				// 找到显式 bean 定义，可能替换导入。
+				// 让我们删除旧的并使用新的。
+				this.configurationClasses.remove(configClass);//删除该configClass
+				this.knownSuperclasses.values().removeIf(configClass::equals);//从knownSuperclasses中删除
 			}
 		}
 
-		// Recursively process the configuration class and its superclass hierarchy.
+		// 递归处理配置类及其超类层次结构。
 		SourceClass sourceClass = asSourceClass(configClass, filter);
 		do {
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
