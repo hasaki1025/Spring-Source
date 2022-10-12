@@ -328,7 +328,7 @@ class ConfigurationClassParser {
 		}
 
 		// 处理接口上的默认方法
-		processInterfaces(configClass, sourceClass);
+		processInterfaces(configClass, sourceClass);//获取该Bean所继承的所有接口中的Bean注解方法并放入集合中
 
 		//处理父类（如果有）
 		if (sourceClass.getMetadata().hasSuperClass()) {
@@ -354,9 +354,9 @@ class ConfigurationClassParser {
 		Collection<SourceClass> memberClasses = sourceClass.getMemberClasses();
 		if (!memberClasses.isEmpty()) {
 			List<SourceClass> candidates = new ArrayList<>(memberClasses.size());
-			for (SourceClass memberClass : memberClasses) {//遍历所有成员
+			for (SourceClass memberClass : memberClasses) {//遍历所有内部类
 				if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) &&
-						!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {//该成员类也是配置类
+						!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {//该内部类也是配置类
 					candidates.add(memberClass);
 				}
 			}
@@ -368,7 +368,7 @@ class ConfigurationClassParser {
 				else {
 					this.importStack.push(configClass);
 					try {
-						processConfigurationClass(candidate.asConfigClass(configClass), filter);//递归处理
+						processConfigurationClass(candidate.asConfigClass(configClass), filter);//递归处理内部类中内部类
 					}
 					finally {
 						this.importStack.pop();
@@ -382,11 +382,11 @@ class ConfigurationClassParser {
 	 * Register default methods on interfaces implemented by the configuration class.
 	 */
 	private void processInterfaces(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
-		for (SourceClass ifc : sourceClass.getInterfaces()) {
-			Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(ifc);
+		for (SourceClass ifc : sourceClass.getInterfaces()) {//遍历所有接口并添加其中的Bean方法
+			Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(ifc);//获取BeanMethod
 			for (MethodMetadata methodMetadata : beanMethods) {
 				if (!methodMetadata.isAbstract()) {
-					// A default method or other concrete method on a Java 8+ interface...
+					// Java 8+ 接口上的默认方法或其他具体方法...
 					configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 				}
 			}
@@ -403,7 +403,7 @@ class ConfigurationClassParser {
 		if (beanMethods.size() > 1 && original instanceof StandardAnnotationMetadata) {
 			// Try reading the class file via ASM for deterministic declaration order...
 			// Unfortunately, the JVM's standard reflection returns methods in arbitrary
-			// order, even between different runs of the same application on the same JVM.
+			// order, even between different runs of the same application on the same JVM. 尝试通过 ASM 读取类文件以获得确定的声明顺序...不幸的是，JVM 的标准反射以任意顺序返回方法，即使在同一 JVM 上同一应用程序的不同运行之间也是如此。
 			try {
 				AnnotationMetadata asm =
 						this.metadataReaderFactory.getMetadataReader(original.getClassName()).getAnnotationMetadata();
@@ -565,7 +565,7 @@ class ConfigurationClassParser {
 			try {
 				for (SourceClass candidate : importCandidates) {
 					if (candidate.isAssignable(ImportSelector.class)) {
-						// Candidate class is an ImportSelector -> delegate to it to determine imports
+						//候选类是一个 ImportSelector -> 委托给它以确定导入
 						Class<?> candidateClass = candidate.loadClass();
 						ImportSelector selector = ParserStrategyUtils.instantiateClass(candidateClass, ImportSelector.class,
 								this.environment, this.resourceLoader, this.registry);
@@ -583,8 +583,8 @@ class ConfigurationClassParser {
 						}
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
-						// Candidate class is an ImportBeanDefinitionRegistrar ->
-						// delegate to it to register additional bean definitions
+						// 候选类是 ImportBeanDefinitionRegistrar ->
+						// 委托给它注册额外的 bean 定义
 						Class<?> candidateClass = candidate.loadClass();
 						ImportBeanDefinitionRegistrar registrar =
 								ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class,
@@ -592,8 +592,8 @@ class ConfigurationClassParser {
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
 					else {
-						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
-						// process it as an @Configuration class
+						// 候选类不是 ImportSelector 或 ImportBeanDefinitionRegistrar ->
+						// 将其作为@Configuration 类处理
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass), exclusionFilter);
@@ -965,12 +965,12 @@ class ConfigurationClassParser {
 			return new ConfigurationClass((MetadataReader) this.source, importedBy);
 		}
 
-		public Collection<SourceClass> getMemberClasses() throws IOException {
+		public Collection<SourceClass> getMemberClasses() throws IOException {//获取内部类
 			Object sourceToProcess = this.source;
 			if (sourceToProcess instanceof Class) {
 				Class<?> sourceClass = (Class<?>) sourceToProcess;
 				try {
-					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();
+					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();//获取内部类
 					List<SourceClass> members = new ArrayList<>(declaredClasses.length);
 					for (Class<?> declaredClass : declaredClasses) {
 						members.add(asSourceClass(declaredClass, DEFAULT_EXCLUSION_FILTER));
@@ -978,13 +978,13 @@ class ConfigurationClassParser {
 					return members;
 				}
 				catch (NoClassDefFoundError err) {
-					// getDeclaredClasses() failed because of non-resolvable dependencies
-					// -> fall back to ASM below
+					// getDeclaredClasses() 由于不可解析的依赖关系而失败
+					//-> 回到下面的 ASM
 					sourceToProcess = metadataReaderFactory.getMetadataReader(sourceClass.getName());
 				}
 			}
 
-			// ASM-based resolution - safe for non-resolvable classes as well
+			// 基于 ASM 的解析 - 对不可解析的类也是安全的
 			MetadataReader sourceReader = (MetadataReader) sourceToProcess;
 			String[] memberClassNames = sourceReader.getClassMetadata().getMemberClassNames();
 			List<SourceClass> members = new ArrayList<>(memberClassNames.length);

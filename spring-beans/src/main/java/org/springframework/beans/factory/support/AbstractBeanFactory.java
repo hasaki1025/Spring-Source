@@ -274,7 +274,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
-			// 检查此工厂中是否存在 bean 定义
+			// 检查父工厂中是否存在 bean 定义
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {//如果父类工厂中不存在当前bean的beanDefinition
 				// 未找到 -> 检查父级。
@@ -1871,12 +1871,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			mbd.isFactoryBean = true;
 		}
 		else {
-			object = getCachedObjectForFactoryBean(beanName);
+			object = getCachedObjectForFactoryBean(beanName);//FactoryBeans 创建的单例对象的缓存：FactoryBean 名称到对象。
 		}
 		if (object == null) {
-			// Return bean instance from factory.
+			// 从工厂返回 bean 实例。
 			FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
-			// Caches object obtained from FactoryBean if it is a singleton.
+			// 如果是单例，则缓存从 FactoryBean 获得的对象。
 			if (mbd == null && containsBeanDefinition(beanName)) {
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}

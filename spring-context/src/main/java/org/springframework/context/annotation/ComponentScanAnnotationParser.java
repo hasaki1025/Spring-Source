@@ -83,12 +83,12 @@ class ComponentScanAnnotationParser {
 			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
 
-		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
+		scanner.setResourcePattern(componentScan.getString("resourcePattern"));//获取扫描路径
 
-		for (AnnotationAttributes includeFilterAttributes : componentScan.getAnnotationArray("includeFilters")) {
+		for (AnnotationAttributes includeFilterAttributes : componentScan.getAnnotationArray("includeFilters")) {//获取包含过滤器
 			List<TypeFilter> typeFilters = TypeFilterUtils.createTypeFiltersFor(includeFilterAttributes, this.environment,
-					this.resourceLoader, this.registry);
-			for (TypeFilter typeFilter : typeFilters) {
+					this.resourceLoader, this.registry);//创建过滤器
+			for (TypeFilter typeFilter : typeFilters) {//设置过滤器
 				scanner.addIncludeFilter(typeFilter);
 			}
 		}
