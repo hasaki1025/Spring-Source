@@ -47,7 +47,7 @@ final class BeanMethod extends ConfigurationMethod {
 		}
 
 		if (this.configurationClass.getMetadata().isAnnotated(Configuration.class.getName())) {//如果该配置类上有Configuration注解修饰
-			if (!getMetadata().isOverridable()) {//Bean注解方法不能是覆盖方法
+			if (!getMetadata().isOverridable()) {//Bean注解方法可以被覆盖（不是静态方法、不是final方法、不是private方法）
 				// @Configuration 类中的实例 @Bean 方法必须是可覆盖的以适应 CGLIB
 				problemReporter.error(new NonOverridableMethodError());
 			}

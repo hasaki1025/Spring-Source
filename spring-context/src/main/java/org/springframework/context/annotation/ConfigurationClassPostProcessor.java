@@ -331,16 +331,16 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			parser.parse(candidates);//解析所有候选者
 			parser.validate();//校验
 
-			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());//本次解析的配置类
-			configClasses.removeAll(alreadyParsed);//移除已被解析的配置类
+			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());//获取所有被解析的配置类
+			configClasses.removeAll(alreadyParsed);//configClasses移除之前（之前的循环中）已被解析的配置类
 
 			// 读取模型并根据其内容创建 bean 定义
-			if (this.reader == null) {
+			if (this.reader == null) {//reader:ConfigurationClassBeanDefinitionReader
 				this.reader = new ConfigurationClassBeanDefinitionReader(
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
-			this.reader.loadBeanDefinitions(configClasses);
+			this.reader.loadBeanDefinitions(configClasses);//解析配置类内部注册的Bean
 			alreadyParsed.addAll(configClasses);//添加已经解析的配置类
 			processConfig.tag("classCount", () -> String.valueOf(configClasses.size())).end();
 
@@ -353,7 +353,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
 				}
 				for (String candidateName : newCandidateNames) {
-					if (!oldCandidateNames.contains(candidateName)) {//如果旧的候选者集合中没有该Bean
+					if (!oldCandidateNames.contains(candidateName)) {//如果旧的候选者集合中没有该Bean（出现这种情况可能是解析配置类的时候解析了其他组件）
 						BeanDefinition bd = registry.getBeanDefinition(candidateName);
 						if (ConfigurationClassUtils.checkConfigurationClassCandidate(bd, this.metadataReaderFactory) &&
 								!alreadyParsedClasses.contains(bd.getBeanClassName())) {//检查是否是未被解析的候选者
@@ -366,14 +366,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 		while (!candidates.isEmpty());
 
-		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
+		// 将 ImportRegistry 注册为 bean 以支持 ImportAware @Configuration 类。ImportRegistry：导入类AnnotationMetadata的注册表。
 		if (sbr != null && !sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
-			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
+			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());//使用BeanFatory注册单例Bean
 		}
 
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
-			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
-			// for a shared cache since it'll be cleared by the ApplicationContext.
+			// 清除外部提供的 MetadataReaderFactory 中的缓存；这是一个无操作
+			// 对于共享缓存，因为它将被 ApplicationContext 清除。
 			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
 		}
 	}

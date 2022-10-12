@@ -1038,7 +1038,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
 					this.beanDefinitionNames = updatedDefinitions;//为什么不直接添加？
-					removeManualSingletonName(beanName);//更新工厂的内部手动单例名称集。
+					removeManualSingletonName(beanName);//删除工厂的内部手动单例名称集。
 				}
 			}
 			else {
