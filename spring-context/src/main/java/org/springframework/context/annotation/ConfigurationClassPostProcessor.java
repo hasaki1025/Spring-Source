@@ -277,9 +277,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();//用于存放配置类的候选者
 		String[] candidateNames = registry.getBeanDefinitionNames();//获取容器中所有BeanDefinititon的名称
 
-		for (String beanName : candidateNames) {
-			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
-			if (beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE) != null) {//
+		for (String beanName : candidateNames) {//遍历所有BeanDefinition
+			BeanDefinition beanDef = registry.getBeanDefinition(beanName);//通过名称获取BeanDefinition
+			if (beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE) != null) {//检查该BeanDefinition是否含有CONFIGURATION_CLASS_ATTRIBUTE
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
@@ -289,7 +289,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 		}
 
-		// 如果没有找到 @Configuration 类，则立即返回
+		// 如果没有Congigutaion候选者，则立即返回
 		if (configCandidates.isEmpty()) {
 			return;
 		}

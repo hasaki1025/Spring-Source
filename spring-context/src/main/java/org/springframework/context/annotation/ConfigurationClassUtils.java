@@ -86,19 +86,19 @@ abstract class ConfigurationClassUtils {
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 
 		String className = beanDef.getBeanClassName();
-		if (className == null || beanDef.getFactoryMethodName() != null) {
+		if (className == null || beanDef.getFactoryMethodName() != null) {//如果含有工厂方法或者Bean的Class为null则返回Fasle
 			return false;
 		}
 
 		AnnotationMetadata metadata;
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
-			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			//可以重用来自给定 BeanDefinition 的预解析元数据...
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			// Check already loaded Class if present...
-			// since we possibly can't even load the class file for this Class.
+			// 检查已加载的类（如果存在）...
+			// 因为我们甚至可能无法加载这个类的类文件。
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
 			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
 					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
@@ -122,18 +122,18 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
-		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
-		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());//获取Configuration注解上的属性
+		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {//如果采用proxyBeanMethods：指定是否应该代理@Bean方法以强制执行 bean 生命周期行为，例如即使在用户代码中直接调用@Bean方法的情况下也返回共享的单例 bean 实例。此功能需要方法拦截，通过运行时生成的 CGLIB 子类实现，该子类具有配置类及其方法不允许声明final等限制。
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);//设置CONFIGURATION_CLASS_ATTRIBUTE为FULL
 		}
-		else if (config != null || isConfigurationCandidate(metadata)) {
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+		else if (config != null || isConfigurationCandidate(metadata)) {//如果config为空，通过isConfigurationCandidate判断：任何带有Component、ComponentScan、Import、ImportResource注解或者含有Bean注解的都属于配置类候选类
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);//设置CONFIGURATION_CLASS_ATTRIBUTE为LIFE
 		}
 		else {
 			return false;
 		}
 
-		// It's a full or lite configuration candidate... Let's determine the order value, if any.
+		// It's a full or lite configuration candidate... Let's determine the order value, if any.这是一个full或lite的配置候选...让我们确定order注解的value，如果有的话。
 		Integer order = getOrder(metadata);
 		if (order != null) {
 			beanDef.setAttribute(ORDER_ATTRIBUTE, order);
@@ -155,15 +155,15 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
-		// Any of the typical annotations found?
-		for (String indicator : candidateIndicators) {
+		// 找到任何典型的注释吗？
+		for (String indicator : candidateIndicators) {//candidateIndicators是一个set集合其中包含Component、ComponentScan、Import、ImportResource注解
 			if (metadata.isAnnotated(indicator)) {
 				return true;
 			}
 		}
 
-		// Finally, let's look for @Bean methods...
-		return hasBeanMethods(metadata);
+		// 最后，让我们寻找@Bean 方法......
+		return hasBeanMethods(metadata);//判断是否含有Bean注解
 	}
 
 	static boolean hasBeanMethods(AnnotationMetadata metadata) {
