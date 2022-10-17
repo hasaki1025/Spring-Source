@@ -63,7 +63,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
-		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
+		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {//使用不同的ParameterNameDiscoverer获取参数名称，获取成功则直接返回
 			String[] result = pnd.getParameterNames(ctor);
 			if (result != null) {
 				return result;

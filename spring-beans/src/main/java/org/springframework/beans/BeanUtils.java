@@ -199,7 +199,7 @@ public abstract class BeanUtils {
 				Class<?>[] parameterTypes = ctor.getParameterTypes();//获取参数列表
 				Assert.isTrue(args.length <= parameterTypes.length, "Can't specify more arguments than constructor parameters");
 				Object[] argsWithDefaultValues = new Object[args.length];//构造方法参数默认值数组
-				for (int i = 0 ; i < args.length; i++) {
+				for (int i = 0 ; i < args.length; i++) {//参数值设置（包括默认值）
 					if (args[i] == null) {
 						Class<?> parameterType = parameterTypes[i];
 						argsWithDefaultValues[i] = (parameterType.isPrimitive() ? DEFAULT_TYPE_VALUES.get(parameterType) : null);//该参数类型是否是基本类型，如果是则采用基本类型的默认值否则使用null作为默认值
