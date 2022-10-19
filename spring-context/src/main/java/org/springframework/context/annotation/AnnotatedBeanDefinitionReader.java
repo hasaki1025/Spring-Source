@@ -261,16 +261,16 @@ public class AnnotatedBeanDefinitionReader {
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);//检查特殊元注解
-		if (qualifiers != null) {//检查除了 bean 类级别的限定符之外，要考虑的特定限定符注释（如果有）
+		if (qualifiers != null) {//如果参数上含有指定的其他注解
 			for (Class<? extends Annotation> qualifier : qualifiers) {
-				if (Primary.class == qualifier) {//是否有Primary注解
+				if (Primary.class == qualifier) {//参数中是否含有Primary注解
 					abd.setPrimary(true);
 				}
-				else if (Lazy.class == qualifier) {//是否有lazy注解
+				else if (Lazy.class == qualifier) {//参数中是否含有lazy注解
 					abd.setLazyInit(true);
 				}
 				else {
-					abd.addQualifier(new AutowireCandidateQualifier(qualifier));//将该类型添加为Autowire的候选者
+					abd.addQualifier(new AutowireCandidateQualifier(qualifier));//该Bean在qualifier注解上的条件添加
 				}
 			}
 		}
@@ -281,7 +281,7 @@ public class AnnotatedBeanDefinitionReader {
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);//创建BeanDefinitionHolder包装BeanDefinitionHoldere
-		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);//应用范围代理模式
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);//应用范围代理模式（根据代理方式返回代理后的对象，如果不采用代理不修改）
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);//注册该BeanDefinition
 	}
 

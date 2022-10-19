@@ -277,7 +277,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();//用于存放配置类的候选者
 		String[] candidateNames = registry.getBeanDefinitionNames();//获取容器中所有BeanDefinititon的名称
 
-		for (String beanName : candidateNames) {//遍历所有BeanDefinition
+		for (String beanName : candidateNames) {//遍历所有BeanDefinition并检查该Bean是否是配置类
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);//通过名称获取BeanDefinition
 			if (beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE) != null) {//检查该BeanDefinition是否含有CONFIGURATION_CLASS_ATTRIBUTE
 				if (logger.isDebugEnabled()) {
@@ -368,7 +368,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		// 将 ImportRegistry 注册为 bean 以支持 ImportAware @Configuration 类。ImportRegistry：导入类AnnotationMetadata的注册表。
 		if (sbr != null && !sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
-			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());//使用BeanFatory注册单例Bean
+			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());//使用BeanFatory注册单例Bean，parser.getImportRegistry()就是importStack
 		}
 
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
@@ -479,9 +479,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		public Object postProcessBeforeInitialization(Object bean, String beanName) {
 			if (bean instanceof ImportAware) {
 				ImportRegistry ir = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
-				AnnotationMetadata importingClass = ir.getImportingClassFor(ClassUtils.getUserClass(bean).getName());
+				AnnotationMetadata importingClass = ir.getImportingClassFor(ClassUtils.getUserClass(bean).getName());//获取Import导入的class
 				if (importingClass != null) {
-					((ImportAware) bean).setImportMetadata(importingClass);
+					((ImportAware) bean).setImportMetadata(importingClass);//设置Bean所导入的Bean
 				}
 			}
 			return bean;

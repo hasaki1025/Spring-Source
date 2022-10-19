@@ -125,7 +125,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();//同样是个Condition注解的评估器
-		for (ConfigurationClass configClass : configurationModel) {
+		for (ConfigurationClass configClass : configurationModel) {//读取configurationModel ，根据其内容向注册表注册 bean 定义。
 			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
 		}
 	}
@@ -154,7 +154,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());//注册ImportedResources注解导入的Bean
-		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());//注册imported注解导入的Bean
+		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());//注册ImportBeanDefinitionRegistrar注解导入的Bean
 	}
 
 	/**
@@ -166,11 +166,11 @@ class ConfigurationClassBeanDefinitionReader {
 
 		ScopeMetadata scopeMetadata = scopeMetadataResolver.resolveScopeMetadata(configBeanDef);//解析作用域
 		configBeanDef.setScope(scopeMetadata.getScopeName());
-		String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
-		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
+		String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);//生成Bean名称
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);//特殊注解查找
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(configBeanDef, configBeanName);
-		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);//definitionHolder代理模式创建代理对象
 		this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());
 		configClass.setBeanName(configBeanName);
 
