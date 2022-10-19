@@ -69,21 +69,21 @@ class ComponentScanAnnotationParser {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
-		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
+		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");//获取BeanName生成器的Class
 		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass);
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
-		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");
+		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");//获取Bean作用域代理方式
 		if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
-			scanner.setScopedProxyMode(scopedProxyMode);
+			scanner.setScopedProxyMode(scopedProxyMode);//根据代理方式创建并设置scopeMetadataResolver
 		}
-		else {
+		else {//采用默认的代理方式
 			Class<? extends ScopeMetadataResolver> resolverClass = componentScan.getClass("scopeResolver");
 			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
 
-		scanner.setResourcePattern(componentScan.getString("resourcePattern"));//获取扫描路径
+		scanner.setResourcePattern(componentScan.getString("resourcePattern"));//获取扫描路径（实际的扫描路径，可以使用正则表达式过滤某些类）
 
 		for (AnnotationAttributes includeFilterAttributes : componentScan.getAnnotationArray("includeFilters")) {//获取包含过滤器
 			List<TypeFilter> typeFilters = TypeFilterUtils.createTypeFiltersFor(includeFilterAttributes, this.environment,
@@ -109,14 +109,14 @@ class ComponentScanAnnotationParser {
 		String[] basePackagesArray = componentScan.getStringArray("basePackages");
 		for (String pkg : basePackagesArray) {
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
-					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);//获取解析后的扫描包名
 			Collections.addAll(basePackages, tokenized);
 		}
 		for (Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
 			basePackages.add(ClassUtils.getPackageName(clazz));
 		}
 		if (basePackages.isEmpty()) {
-			basePackages.add(ClassUtils.getPackageName(declaringClass));
+			basePackages.add(ClassUtils.getPackageName(declaringClass));//如果没有指定包名则添加该扫描器所在的类的包
 		}
 
 		scanner.addExcludeFilter(new AbstractTypeHierarchyTraversingFilter(false, false) {

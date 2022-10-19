@@ -105,7 +105,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	@Override
 	public void setServletContext(@Nullable ServletContext servletContext) {
-		this.servletContext = servletContext;
+		this.servletContext = servletContext;//设置该容器的ServletContext
 	}
 
 	@Override
@@ -166,11 +166,11 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
-		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));//添加ServletAware后置处理器，该处理器用于帮助初始化Servlet,将该后置处理器放入BeanFactory中
+		beanFactory.ignoreDependencyInterface(ServletContextAware.class);//忽略该接口的自动装配功能
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
 
-		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
+		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);//注册Web容器生命周期
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);
 	}
 

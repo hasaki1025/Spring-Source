@@ -405,8 +405,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see org.springframework.web.WebApplicationInitializer
 	 */
 	public DispatcherServlet(WebApplicationContext webApplicationContext) {
-		super(webApplicationContext);
-		setDispatchOptionsRequest(true);
+		super(webApplicationContext);//设置Application容器
+		setDispatchOptionsRequest(true);//设置是否可以让servlet接受option类型请求
 	}
 
 

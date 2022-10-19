@@ -1026,11 +1026,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public void registerScope(String scopeName, Scope scope) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		Assert.notNull(scope, "Scope must not be null");
-		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {
+		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {//不能注册单例和原型作用域
 			throw new IllegalArgumentException("Cannot replace existing scopes 'singleton' and 'prototype'");
 		}
-		Scope previous = this.scopes.put(scopeName, scope);
-		if (previous != null && previous != scope) {
+		Scope previous = this.scopes.put(scopeName, scope);//scopes用于存放作用域名称和Scope类（接口）
+		if (previous != null && previous != scope) {//新的替换旧的
 			if (logger.isDebugEnabled()) {
 				logger.debug("Replacing scope '" + scopeName + "' from [" + previous + "] to [" + scope + "]");
 			}

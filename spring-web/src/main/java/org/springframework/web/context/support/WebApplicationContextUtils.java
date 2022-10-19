@@ -183,16 +183,16 @@ public abstract class WebApplicationContextUtils {
 	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory,
 			@Nullable ServletContext sc) {
 
-		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
-		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
+		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());//注册request生命周期(放入BeanFactory的Map集合中)
+		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());//注册Session生命周期
 		if (sc != null) {
 			ServletContextScope appScope = new ServletContextScope(sc);
-			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
+			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);//如果ServletContext不为空则注册application作用域
 			// Register as ServletContext attribute, for ContextCleanupListener to detect it.
-			sc.setAttribute(ServletContextScope.class.getName(), appScope);
+			sc.setAttribute(ServletContextScope.class.getName(), appScope);//并将作用域的值放入ServletContext中
 		}
 
-		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());
+		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());//添加接口注入的直接实现类
 		beanFactory.registerResolvableDependency(ServletResponse.class, new ResponseObjectFactory());
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
 		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
@@ -221,38 +221,38 @@ public abstract class WebApplicationContextUtils {
 	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf,
 			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
-		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
-			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);
+		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {//如果不存在名称为servletContext的Bean则注册为单例
+			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);//注册单例（直接实例化）
 		}
 
 		if (servletConfig != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
 			bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME, servletConfig);
 		}
 
-		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {//名称为contextParameters的Bean
 			Map<String, String> parameterMap = new HashMap<>();
-			if (servletContext != null) {
-				Enumeration<?> paramNameEnum = servletContext.getInitParameterNames();
-				while (paramNameEnum.hasMoreElements()) {
+			if (servletContext != null) {//servletContext参数包装
+				Enumeration<?> paramNameEnum = servletContext.getInitParameterNames();//获取ervletContext中的initParamer列表，这些属性配置作用域全局Servlet
+				while (paramNameEnum.hasMoreElements()) {//遍历参数名称并将参数列表放入parameterMap中
 					String paramName = (String) paramNameEnum.nextElement();
 					parameterMap.put(paramName, servletContext.getInitParameter(paramName));
 				}
 			}
-			if (servletConfig != null) {
-				Enumeration<?> paramNameEnum = servletConfig.getInitParameterNames();
+			if (servletConfig != null) {//ServletConfig参数包装
+				Enumeration<?> paramNameEnum = servletConfig.getInitParameterNames();//ServletConfig中的配置作用域单个Servlet
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
 					parameterMap.put(paramName, servletConfig.getInitParameter(paramName));
 				}
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,
-					Collections.unmodifiableMap(parameterMap));
+					Collections.unmodifiableMap(parameterMap));//注册单例
 		}
 
-		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
+		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {//contextAttributes作为Bean加载到容器中
 			Map<String, Object> attributeMap = new HashMap<>();
 			if (servletContext != null) {
-				Enumeration<?> attrNameEnum = servletContext.getAttributeNames();
+				Enumeration<?> attrNameEnum = servletContext.getAttributeNames();//获取Attribute列表，attribute参数可以在后续请求中设置
 				while (attrNameEnum.hasMoreElements()) {
 					String attrName = (String) attrNameEnum.nextElement();
 					attributeMap.put(attrName, servletContext.getAttribute(attrName));
