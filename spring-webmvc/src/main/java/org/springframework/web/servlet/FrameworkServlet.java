@@ -527,8 +527,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 
 		try {
-			this.webApplicationContext = initWebApplicationContext();
-			initFrameworkServlet();
+			this.webApplicationContext = initWebApplicationContext();//设置该Servlet的spring容器
+			initFrameworkServlet();//暂时没有实现（交给子类实现）
 		}
 		catch (ServletException | RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
@@ -876,11 +876,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			throws ServletException, IOException {
 
 		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
-		if (httpMethod == HttpMethod.PATCH || httpMethod == null) {
+		if (httpMethod == HttpMethod.PATCH || httpMethod == null) {//patch类型请求代表局部更新
 			processRequest(request, response);
 		}
 		else {
-			super.service(request, response);
+			super.service(request, response);//再次调用HttpServlet中的service方法
 		}
 	}
 
@@ -991,13 +991,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 		Throwable failureCause = null;
 
-		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContext localeContext = buildLocaleContext(request);
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();//LocaleContext用于获取Loacl类（jdk），local类用于代表当地的位置（没什么作用，只是个标志）
+		LocaleContext localeContext = buildLocaleContext(request);//获取request中的local对象并创建LocaleContext
 
-		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
-		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
+		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();//获取request中的参数（该Servlet中一些请求的公共属性，存储在ThreadLoacl中）
+		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);//使用ServletRequestAttributes包装
 
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);//异步请求管理器
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
 
 		initContextHolders(request, localeContext, requestAttributes);

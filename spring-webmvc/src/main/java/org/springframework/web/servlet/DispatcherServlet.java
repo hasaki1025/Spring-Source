@@ -923,30 +923,30 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		logRequest(request);
+		logRequest(request);//日志打印
 
-		// Keep a snapshot of the request attributes in case of an include,
-		// to be able to restore the original attributes after the include.
+		// 保留请求属性的快照，以防出现包含，
+		// 以便能够在包含之后恢复原始属性。
 		Map<String, Object> attributesSnapshot = null;
-		if (WebUtils.isIncludeRequest(request)) {
+		if (WebUtils.isIncludeRequest(request)) {//如果请求中包含javax.servlet.include.request_uri的属性值
 			attributesSnapshot = new HashMap<>();
-			Enumeration<?> attrNames = request.getAttributeNames();
-			while (attrNames.hasMoreElements()) {
+			Enumeration<?> attrNames = request.getAttributeNames();//获取所有attribute
+			while (attrNames.hasMoreElements()) {//遍历所有attribute
 				String attrName = (String) attrNames.nextElement();
-				if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {
+				if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {//如果该属性值以org.springframework.web.servlet开头则保存
 					attributesSnapshot.put(attrName, request.getAttribute(attrName));
 				}
 			}
 		}
 
 		// Make framework objects available to handlers and view objects.
-		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
+		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());//设置context属性
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
-		if (this.flashMapManager != null) {
-			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
+		if (this.flashMapManager != null) {//flashMapManager用于存储和提取flashMap
+			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);//FlashMap用于存储给指定请求的一些属性信息，是HashMap的子类
 			if (inputFlashMap != null) {
 				request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
 			}
@@ -961,7 +961,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		try {
-			doDispatch(request, response);
+			doDispatch(request, response);//请求转发
 		}
 		finally {
 			if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {

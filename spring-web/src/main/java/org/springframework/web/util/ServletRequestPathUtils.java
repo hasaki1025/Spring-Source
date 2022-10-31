@@ -247,7 +247,7 @@ public abstract class ServletRequestPathUtils {
 		public static RequestPath parse(HttpServletRequest request) {
 			String requestUri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 			if (requestUri == null) {
-				requestUri = request.getRequestURI();
+				requestUri = request.getRequestURI();//请求的URI(url去掉端口和IP)
 			}
 			if (UrlPathHelper.servlet4Present) {
 				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);

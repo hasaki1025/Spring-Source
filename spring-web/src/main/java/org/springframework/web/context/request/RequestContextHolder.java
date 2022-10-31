@@ -102,7 +102,7 @@ public abstract class RequestContextHolder  {
 	 */
 	@Nullable
 	public static RequestAttributes getRequestAttributes() {
-		RequestAttributes attributes = requestAttributesHolder.get();
+		RequestAttributes attributes = requestAttributesHolder.get();//从线程本地变量中获取
 		if (attributes == null) {
 			attributes = inheritableRequestAttributesHolder.get();
 		}
