@@ -307,17 +307,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					beanCreation.tag("beanType", requiredType::toString);
 				}
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);//获取合并的Bean的定义
-				checkMergedBeanDefinition(mbd, beanName, args);
+				checkMergedBeanDefinition(mbd, beanName, args);//判断该bean是否是“抽象的”，即不打算自己实例化，而只是作为具体子bean定义的父bean
 
 				// 保证当前 bean 所依赖的 bean 的初始化。
-				String[] dependsOn = mbd.getDependsOn();
+				String[] dependsOn = mbd.getDependsOn();//依赖关系通常是通过bean属性或构造函数参数表示的
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
 						if (isDependent(beanName, dep)) {//循环依赖解决
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
-						registerDependentBean(dep, beanName);//注册依赖类
+						registerDependentBean(dep, beanName);//依赖关系注册
 						try {
 							getBean(dep);
 						}
@@ -400,7 +400,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@SuppressWarnings("unchecked")
 	<T> T adaptBeanInstance(String name, Object bean, @Nullable Class<?> requiredType) {
-		// Check if required type matches the type of the actual bean instance.
+		//检查所需类型是否与实际 bean 实例的类型匹配。
 		if (requiredType != null && !requiredType.isInstance(bean)) {
 			try {
 				Object convertedBean = getTypeConverter().convertIfNecessary(bean, requiredType);
@@ -620,7 +620,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 
-		// If we couldn't use the target type, try regular prediction.
+		//如果我们不能使用目标类型，尝试常规预测。
 		if (predictedType == null) {
 			predictedType = predictBeanType(beanName, mbd, typesToMatch);
 			if (predictedType == null) {
@@ -668,7 +668,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return typeToMatch.isAssignableFrom(beanType);
 		}
 
-		// If we don't have a bean type, fallback to the predicted type
+		//如果没有bean类型，则退回到预测的类型
 		return typeToMatch.isAssignableFrom(predictedType);
 	}
 
@@ -1264,9 +1264,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the original bean name
 	 */
 	protected String originalBeanName(String name) {
-		String beanName = transformedBeanName(name);
-		if (name.startsWith(FACTORY_BEAN_PREFIX)) {
-			beanName = FACTORY_BEAN_PREFIX + beanName;
+		String beanName = transformedBeanName(name);//去除了&的Bean名称
+		if (name.startsWith(FACTORY_BEAN_PREFIX)) {//如果该Bean名称原本带有&
+			beanName = FACTORY_BEAN_PREFIX + beanName;//再次添加&
 		}
 		return beanName;
 	}
@@ -1474,7 +1474,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected void checkMergedBeanDefinition(RootBeanDefinition mbd, String beanName, @Nullable Object[] args)
 			throws BeanDefinitionStoreException {
 
-		if (mbd.isAbstract()) {
+		if (mbd.isAbstract()) {//返回该bean是否是“抽象的”，即不打算自己实例化，而只是作为具体子bean定义的父bean
 			throw new BeanIsAbstractException(beanName);
 		}
 	}
@@ -1779,7 +1779,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (!this.alreadyCreated.contains(beanName)) {
 					// 现在我们实际上正在创建，让 bean 定义重新合并
 					// bean...以防万一它的一些元数据同时发生变化。
-					clearMergedBeanDefinition(beanName);
+					clearMergedBeanDefinition(beanName);//
 					this.alreadyCreated.add(beanName);
 				}
 			}

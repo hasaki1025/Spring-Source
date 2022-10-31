@@ -85,9 +85,9 @@ public abstract class BeanFactoryUtils {
 		}
 		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
 			do {
-				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());//去除FACTORY_BEAN_PREFIX直到没有该前缀
+				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
 			}
-			while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
+			while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));//去除transformedBeanNameCache中所有带有‘&’的Bean名称
 			return beanName;
 		});
 	}

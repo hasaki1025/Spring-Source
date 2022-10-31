@@ -146,7 +146,7 @@ public abstract class AnnotationConfigUtils {
 	 * that have actually been registered by this call
 	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(//初始化BeanComparator和AutowireCandidateResolver并注册8个注解引导BeanDefinitionHolder
-			BeanDefinitionRegistry registry, @Nullable Object source) {
+			BeanDefinitionRegistry registry, @Nullable Object source) {//source – 触发此注册的配置源元素（已提取）。可能为null
 
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);//如果registry是BeanFactory的实例则返回registry否则通过get方法获取beanFactory
 		if (beanFactory != null) {

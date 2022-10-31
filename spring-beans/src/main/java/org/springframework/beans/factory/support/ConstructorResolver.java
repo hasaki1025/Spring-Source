@@ -198,7 +198,7 @@ class ConstructorResolver {
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);//解析BeanDefinition中的参数值（如果BeanDefinition中有指定需要解析的值）
 			}
 
-			AutowireUtils.sortConstructors(candidates);//构造方法排序
+			AutowireUtils.sortConstructors(candidates);//构造方法排序（public优先，都是public的情况下参数多的优先）
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;//可选的构造方法
 			Deque<UnsatisfiedDependencyException> causes = null;
@@ -778,7 +778,7 @@ class ConstructorResolver {
 				args.rawArguments[paramIndex] = originalValue;
 			}
 			else {
-				MethodParameter methodParam = MethodParameter.forExecutable(executable, paramIndex);
+				MethodParameter methodParam = MethodParameter.forExecutable(executable, paramIndex);//根据构造方法和参数位置得到methodParam
 				//没有找到明确的匹配:我们要么应该自动装配，要么
 				// 为给定的构造函数创建参数数组必须失败。
 				if (!autowiring) {//只能采用自动装配
@@ -876,7 +876,7 @@ class ConstructorResolver {
 			@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback) {
 
 		Class<?> paramType = param.getParameterType();
-		if (InjectionPoint.class.isAssignableFrom(paramType)) {//注射点简单的描述符,指向方法/构造函数参数或字段。由UnsatisfiedDependencyException暴露。也可以作为工厂方法的参数，对请求注入点作出反应，以构建定制的bean实例。
+		if (InjectionPoint.class.isAssignableFrom(paramType)) {//参数类型是否是InjectionPoint
 			InjectionPoint injectionPoint = currentInjectionPoint.get();
 			if (injectionPoint == null) {
 				throw new IllegalStateException("No current InjectionPoint available for " + param);

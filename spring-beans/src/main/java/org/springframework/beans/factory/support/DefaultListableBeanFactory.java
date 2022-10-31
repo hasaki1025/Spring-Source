@@ -957,7 +957,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		// Trigger post-initialization callback for all applicable beans...
+		// 为所有适用的 bean 触发初始化后回调...
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
 			if (singletonInstance instanceof SmartInitializingSingleton) {
@@ -1001,7 +1001,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
-		if (existingDefinition != null) {
+		if (existingDefinition != null) {//重复Bean定义解决
 			if (!isAllowBeanDefinitionOverriding()) {//是否允许重新注册具有相同名称的不同定义。
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
@@ -1029,8 +1029,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);//放入beanDefinitionMap中
 		}
-		else {
-			if (hasBeanCreationStarted()) {
+		else {//如果Map中不含有该名称的Bean定义则放入Map中
+			if (hasBeanCreationStarted()) {//如果在Bean创建阶段
 				// 无法再修改启动时集合元素（用于稳定迭代）
 				synchronized (this.beanDefinitionMap) {
 					this.beanDefinitionMap.put(beanName, beanDefinition);
@@ -1038,20 +1038,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
 					this.beanDefinitionNames = updatedDefinitions;//为什么不直接添加？
-					removeManualSingletonName(beanName);//删除工厂的内部手动单例名称集。
+					removeManualSingletonName(beanName);//删除工厂的内部手动单例名称集。//TODO 暂时不知道有什么作用
 				}
 			}
 			else {
 				// 仍处于启动注册阶段
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
-				removeManualSingletonName(beanName);//删除手动单例名称
+				removeManualSingletonName(beanName);//删除手动单例名称 //TODO 暂时不知道有什么作用
 			}
-			this.frozenBeanDefinitionNames = null;//frozenBeanDefinitionNames：在冻结配置的情况下缓存 bean 定义名称的数组
+			this.frozenBeanDefinitionNames = null;//frozenBeanDefinitionNames：在冻结配置的情况下缓存 bean 定义名称的数组（不知道有什么作用）
 		}
 
-		if (existingDefinition != null || containsSingleton(beanName)) {
-			resetBeanDefinition(beanName);
+		if (existingDefinition != null || containsSingleton(beanName)) {//如果存在单例或者之气含有注册过的BeanDefiniton则重新设置Bean的定义
+			resetBeanDefinition(beanName);//移除之前的Bean实例和BeanDefinition
 		}
 		else if (isConfigurationFrozen()) {
 			clearByTypeCache();
@@ -1099,11 +1099,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @see #removeBeanDefinition
 	 */
 	protected void resetBeanDefinition(String beanName) {
-		// Remove the merged bean definition for the given bean, if already created.
+		// 删除给定 bean 的合并 bean 定义（如果已创建）。
 		clearMergedBeanDefinition(beanName);
 
-		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
-		// be necessary, rather just meant for overriding a context's default beans
+		// 如果有的话，从单例缓存中删除相应的 bean。通常不应该
+		//  是必要的，而只是用于覆盖上下文的默认 bean
 		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
 		destroySingleton(beanName);
 
@@ -1294,7 +1294,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());//初始化参数名称Discovery
-		if (Optional.class == descriptor.getDependencyType()) {//Optional类(java.util.Optional)是一个容器类，代表一个值存在或不存在
+		if (Optional.class == descriptor.getDependencyType()) {//Optional类(java.util.Optional)是一个容器类，更加方便代表一个值存在或不存在
 			return createOptionalDependency(descriptor, requestingBeanName);
 		}
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||

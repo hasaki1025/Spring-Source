@@ -349,7 +349,7 @@ public abstract class ClassUtils {
 	 * (typically a missing dependency declaration in a Jigsaw module definition
 	 * for a superclass or interface implemented by the class to be checked here)
 	 */
-	public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
+	public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {//确定由提供的名称标识的Class是否存在并可以加载
 		try {
 			forName(className, classLoader);
 			return true;
@@ -397,24 +397,24 @@ public abstract class ClassUtils {
 	public static boolean isCacheSafe(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
-			ClassLoader target = clazz.getClassLoader();
+			ClassLoader target = clazz.getClassLoader();//获取加载clazz的类加载器
 			// Common cases
-			if (target == classLoader || target == null) {
+			if (target == classLoader || target == null) {//如果指定的类加载器和该clazz的类加载器相同则返回true
 				return true;
 			}
-			if (classLoader == null) {
+			if (classLoader == null) {//指定类加载器为空则返回false
 				return false;
 			}
 			// Check for match in ancestors -> positive
-			ClassLoader current = classLoader;
-			while (current != null) {
+			ClassLoader current = classLoader;//当两个类加载器不同时
+			while (current != null) {//检查clazz类的类加载器是否是指定类加载器的子加载器，如果是则返回true
 				current = current.getParent();
 				if (current == target) {
 					return true;
 				}
 			}
 			// Check for match in children -> negative
-			while (target != null) {
+			while (target != null) {//当clazz的类加载器不是指定类加载器的的子加载器，则反过来检查指定的类加载器是否是clazz的类加载器的子类如果是则返回false
 				target = target.getParent();
 				if (target == classLoader) {
 					return false;
@@ -427,7 +427,7 @@ public abstract class ClassUtils {
 
 		// Fallback for ClassLoaders without parent/child relationship:
 		// safe if same Class can be loaded from given ClassLoader
-		return (classLoader != null && isLoadable(clazz, classLoader));
+		return (classLoader != null && isLoadable(clazz, classLoader));//两个类加载器没有任何关系，检查指定类加载器上是否存在同名类（另一个没有被加载，如果有则加载并返回true）
 	}
 
 	/**
@@ -438,12 +438,12 @@ public abstract class ClassUtils {
 	 */
 	private static boolean isLoadable(Class<?> clazz, ClassLoader classLoader) {
 		try {
-			return (clazz == classLoader.loadClass(clazz.getName()));
+			return (clazz == classLoader.loadClass(clazz.getName()));//尝试加载，如果加载得到的class和clazz不同则返回true（说明是同名类）
 			// Else: different class with same name found
 		}
 		catch (ClassNotFoundException ex) {
 			// No corresponding class found at all
-			return false;
+			return false;//由于该类已经被加载过了则不会重复加载，而且找不到同名类，于是抛出异常ClassNotFoundException
 		}
 	}
 

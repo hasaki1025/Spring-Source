@@ -43,7 +43,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class InjectionMetadata {
+public class InjectionMetadata {//用于管理注入元数据的内部类。不适合在应用程序中直接使用。
 
 	/**
 	 * An empty {@code InjectionMetadata} instance with no-op callbacks.

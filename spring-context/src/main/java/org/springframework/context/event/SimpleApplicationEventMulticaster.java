@@ -135,12 +135,12 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
 		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
 		Executor executor = getTaskExecutor();//获取线程池
-		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
-			if (executor != null) {//如果线程池不为空则调用一个线程调用监听方法
+		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {//获取到可以支持指定的事件类型和事件发布者（Context）类型的所有默认事件监听器
+			if (executor != null) {//如果线程池不为空则调用一个线程并执行监听方法
 				executor.execute(() -> invokeListener(listener, event));
 			}
 			else {
-				invokeListener(listener, event);//主线程执行监听方法
+				invokeListener(listener, event);//当前线程执行监听方法
 			}
 		}
 	}
@@ -156,8 +156,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * @since 4.1
 	 */
 	protected void invokeListener(ApplicationListener<?> listener, ApplicationEvent event) {
-		ErrorHandler errorHandler = getErrorHandler();
-		if (errorHandler != null) {
+		ErrorHandler errorHandler = getErrorHandler();//异常处理器
+		if (errorHandler != null) {//执行监听方法（有异常处理器）
 			try {
 				doInvokeListener(listener, event);
 			}
@@ -165,7 +165,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				errorHandler.handleError(err);
 			}
 		}
-		else {
+		else {//执行监听方法（没有异常处理器）
 			doInvokeListener(listener, event);
 		}
 	}
@@ -173,7 +173,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void doInvokeListener(ApplicationListener listener, ApplicationEvent event) {
 		try {
-			listener.onApplicationEvent(event);
+			listener.onApplicationEvent(event);//执行listener的事件监听方法
 		}
 		catch (ClassCastException ex) {
 			String msg = ex.getMessage();

@@ -167,7 +167,7 @@ public abstract class AnnotationUtils {
 		if (annotationName.startsWith("java.")) {//java内置注解
 			return true;
 		}
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {//是Order注解或者是java内置的注解
+		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {//class继承了Order接口或者是jdk中的类
 			return false;
 		}
 		return true;

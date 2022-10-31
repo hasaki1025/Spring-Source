@@ -155,8 +155,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
 		synchronized (this.singletonObjects) {
 			if (!this.singletonObjects.containsKey(beanName)) {
-				this.singletonFactories.put(beanName, singletonFactory);
-				this.earlySingletonObjects.remove(beanName);
+				this.singletonFactories.put(beanName, singletonFactory);//放入单例工厂集合中
+				this.earlySingletonObjects.remove(beanName);//早期单例中移除该Bean
 				this.registeredSingletons.add(beanName);
 			}
 		}
@@ -235,8 +235,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					newSingleton = true;
 				}
 				catch (IllegalStateException ex) {
-					// Has the singleton object implicitly appeared in the meantime ->
-					// if yes, proceed with it since the exception indicates that state.
+					// 同时是否隐式出现了单例对象->
+					// 如果是，则继续执行，因为异常指示了该状态。
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
 						throw ex;
@@ -254,10 +254,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
-					afterSingletonCreation(beanName);
+					afterSingletonCreation(beanName);//一些检查工作
 				}
 				if (newSingleton) {
-					addSingleton(beanName, singletonObject);
+					addSingleton(beanName, singletonObject);//向BeanRegistry中添加该Bean
 				}
 			}
 			return singletonObject;
@@ -413,7 +413,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public void registerDependentBean(String beanName, String dependentBeanName) {
 		String canonicalName = canonicalName(beanName);
 
-		synchronized (this.dependentBeanMap) {
+		synchronized (this.dependentBeanMap) {//相关Bean之间的关系注册
 			Set<String> dependentBeans =
 					this.dependentBeanMap.computeIfAbsent(canonicalName, k -> new LinkedHashSet<>(8));
 			if (!dependentBeans.add(dependentBeanName)) {
@@ -421,7 +421,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			}
 		}
 
-		synchronized (this.dependenciesForBeanMap) {
+		synchronized (this.dependenciesForBeanMap) {//依赖Bean之间关系的注册
 			Set<String> dependenciesForBean =
 					this.dependenciesForBeanMap.computeIfAbsent(dependentBeanName, k -> new LinkedHashSet<>(8));
 			dependenciesForBean.add(canonicalName);

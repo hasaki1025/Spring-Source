@@ -129,37 +129,37 @@ public final class SpringFactoriesLoader {
 			classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
 		}
 		String factoryTypeName = factoryType.getName();
-		return loadSpringFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList());
+		return loadSpringFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList());//获取所有factoryTypeName的实现类的类名
 	}
 
 	private static Map<String, List<String>> loadSpringFactories(ClassLoader classLoader) {
-		Map<String, List<String>> result = cache.get(classLoader);
+		Map<String, List<String>> result = cache.get(classLoader);//cache：classloader为key，value是该类加载器下所有Factory的名称和实现类名称的集合
 		if (result != null) {
 			return result;
 		}
 
 		result = new HashMap<>();
 		try {
-			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);
+			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);//加载META-INF/spring.factories下的资源,该文件下放置了所有工厂类的实现类的全类名
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				UrlResource resource = new UrlResource(url);
-				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+				Properties properties = PropertiesLoaderUtils.loadProperties(resource);//以Properties的形式导入
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
 					String factoryTypeName = ((String) entry.getKey()).trim();
 					String[] factoryImplementationNames =
-							StringUtils.commaDelimitedListToStringArray((String) entry.getValue());
-					for (String factoryImplementationName : factoryImplementationNames) {
+							StringUtils.commaDelimitedListToStringArray((String) entry.getValue());//将Value值转为String数组
+					for (String factoryImplementationName : factoryImplementationNames) {//factory类作为key，实现类作为value
 						result.computeIfAbsent(factoryTypeName, key -> new ArrayList<>())
 								.add(factoryImplementationName.trim());
 					}
 				}
 			}
 
-			// Replace all lists with unmodifiable lists containing unique elements
+			// 用包含唯一元素的不可修改列表替换所有列表
 			result.replaceAll((factoryType, implementations) -> implementations.stream().distinct()
 					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
-			cache.put(classLoader, result);
+			cache.put(classLoader, result);//放入Cache中
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException("Unable to load factories from location [" +
