@@ -90,23 +90,23 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
-		AnnotationMetadata metadata;
+		AnnotationMetadata metadata;//获取元数据
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			//可以重用来自给定 BeanDefinition 的预解析元数据...
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			// 检查已加载的类（如果存在）...
+			// 检查已加载的类（如果存在，已加载指的是类加载）...
 			// 因为我们甚至可能无法加载这个类的类文件。
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
 			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
 					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
 					AopInfrastructureBean.class.isAssignableFrom(beanClass) ||
-					EventListenerFactory.class.isAssignableFrom(beanClass)) {
+					EventListenerFactory.class.isAssignableFrom(beanClass)) {//BeanFactoryPostProcessor、BeanPostProcessor、AOP所用类、事件监听者工厂无法作为配置类
 				return false;
 			}
-			metadata = AnnotationMetadata.introspect(beanClass);
+			metadata = AnnotationMetadata.introspect(beanClass);//使用StandardAnnotationMetadata包装元数据
 		}
 		else {
 			try {
@@ -124,19 +124,19 @@ abstract class ConfigurationClassUtils {
 
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());//获取Configuration注解上的属性
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {//如果采用proxyBeanMethods：指定是否应该代理@Bean方法以强制执行 bean 生命周期行为，例如即使在用户代码中直接调用@Bean方法的情况下也返回共享的单例 bean 实例。此功能需要方法拦截，通过运行时生成的 CGLIB 子类实现，该子类具有配置类及其方法不允许声明final等限制。
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);//设置CONFIGURATION_CLASS_ATTRIBUTE为FULL
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);//设置CONFIGURATION_CLASS_ATTRIBUTE为FULL（用于标记该类为配置类）模式
 		}
 		else if (config != null || isConfigurationCandidate(metadata)) {//如果config为空，通过isConfigurationCandidate判断：任何带有Component、ComponentScan、Import、ImportResource注解或者含有Bean注解的都属于配置类候选类
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);//设置CONFIGURATION_CLASS_ATTRIBUTE为LIFE
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);//设置CONFIGURATION_CLASS_ATTRIBUTE为LITE模式
 		}
 		else {
 			return false;
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.这是一个full或lite的配置候选...让我们确定order注解的value，如果有的话。
-		Integer order = getOrder(metadata);
+		Integer order = getOrder(metadata);//获取该Bean定义的Order属性
 		if (order != null) {
-			beanDef.setAttribute(ORDER_ATTRIBUTE, order);
+			beanDef.setAttribute(ORDER_ATTRIBUTE, order);//设置Order属性
 		}
 
 		return true;

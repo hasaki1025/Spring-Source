@@ -1113,7 +1113,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
-		if (hasMethodOverrides() && getFactoryMethodName() != null) {//FactoryMethodName：当使用自定义一个工厂类时，该工厂产生指定Bean的静态方法就是FactoryMethod可以在XML文件中的Bean标签上指定，指定后如果想要从容器中获取该工厂产生的Bean，Spring就会调用该方法
+		if (hasMethodOverrides() && getFactoryMethodName() != null) {//如果该BEAN是FactoryBean则不能含有重写方法
 			throw new BeanDefinitionValidationException(//这里要求工厂类不能含有重载方法
 					"Cannot combine factory method with container-generated method overrides: " +
 					"the factory method must create the concrete bean instance.");

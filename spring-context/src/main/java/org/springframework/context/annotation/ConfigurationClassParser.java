@@ -228,11 +228,11 @@ class ConfigurationClassParser {
 
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);//从configurationClasses获取该配置类的ConfigurationClass
 		if (existingClass != null) {//如果不为空则代表可能从其他地方导入了配置类
-			if (configClass.isImported()) {//是否是import导入的配置类
-				if (existingClass.isImported()) {
-					existingClass.mergeImportedBy(configClass);//添加该配置类
+			if (configClass.isImported()) {//现在需要解析的配置类是否是import导入的配置类
+				if (existingClass.isImported()) {//如果原来的配置类是通过import导入的
+					existingClass.mergeImportedBy(configClass);//放入用于存放import注解导入的配置类的集合中
 				}
-				// 否则忽略新导入的配置类；现有的非导入类会覆盖它。
+				// 否则忽略新导入的配置类；原有的非导入类会覆盖它。
 				return;
 			}
 			else {
