@@ -1040,35 +1040,35 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
-				processedRequest = checkMultipart(request);
-				multipartRequestParsed = (processedRequest != request);
+				processedRequest = checkMultipart(request);//如果该请求的媒体类型是Multipart则通过multipartResolver包装和计息后返回一个新的Request
+				multipartRequestParsed = (processedRequest != request);//如果两者不同则代表已经解析过了Multipart类型
 
 				// Determine handler for the current request.
-				mappedHandler = getHandler(processedRequest);
-				if (mappedHandler == null) {
+				mappedHandler = getHandler(processedRequest);//获取执行链
+				if (mappedHandler == null) {//执行链为null
 					noHandlerFound(processedRequest, response);
 					return;
 				}
 
 				// Determine handler adapter for the current request.
-				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());//获取合适的Handler适配器
 
 				// Process last-modified header, if supported by the handler.
 				String method = request.getMethod();
 				boolean isGet = HttpMethod.GET.matches(method);
-				if (isGet || HttpMethod.HEAD.matches(method)) {
+				if (isGet || HttpMethod.HEAD.matches(method)) {//如果是Get方法
 					long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
 					if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
 						return;
 					}
 				}
 
-				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+				if (!mappedHandler.applyPreHandle(processedRequest, response)) {//执行所有preHandler方法，如果有preHandler返回false则直接返回
 					return;
 				}
 
 				// Actually invoke the handler.
-				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());//执行Controller方法（对应的适配器执行）
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
 					return;
@@ -1194,9 +1194,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see MultipartResolver#resolveMultipart
 	 */
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
-		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
+		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {//MediaType类型是Multipart类型
 			if (WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class) != null) {
-				if (DispatcherType.REQUEST.equals(request.getDispatcherType())) {
+				if (DispatcherType.REQUEST.equals(request.getDispatcherType())) {//Servlet工作类型为Request（其他的类型有转发，include（类似转发），错误，同步类型）
 					logger.trace("Request already resolved to MultipartHttpServletRequest, e.g. by MultipartFilter");
 				}
 			}
@@ -1260,10 +1260,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-		if (this.handlerMappings != null) {
-			for (HandlerMapping mapping : this.handlerMappings) {
-				HandlerExecutionChain handler = mapping.getHandler(request);
-				if (handler != null) {
+		if (this.handlerMappings != null) {//handlerMappings中包含了四个HandlerMapping（RequestMappingHandlerMapping、BeanNameUrl等）
+			for (HandlerMapping mapping : this.handlerMappings) {//遍历所有HandlerMapping
+				HandlerExecutionChain handler = mapping.getHandler(request);//获取执行链
+				if (handler != null) {//一旦得到不为空的HandlerExecutionChain则返回HandlerExecutionChain
 					return handler;
 				}
 			}
@@ -1297,7 +1297,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
 		if (this.handlerAdapters != null) {
-			for (HandlerAdapter adapter : this.handlerAdapters) {
+			for (HandlerAdapter adapter : this.handlerAdapters) {//遍历所有handler适配器如果合适则返回
 				if (adapter.supports(handler)) {
 					return adapter;
 				}

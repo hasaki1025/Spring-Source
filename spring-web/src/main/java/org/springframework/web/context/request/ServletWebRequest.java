@@ -209,7 +209,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	@Override
 	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
-		if (this.notModified || (response != null && HttpStatus.OK.value() != response.getStatus())) {
+		if (this.notModified || (response != null && HttpStatus.OK.value() != response.getStatus())) {//如果已经完成了请求（得到了响应且响应不是200）
 			return this.notModified;
 		}
 
@@ -229,8 +229,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		}
 
 		// Update response
-		if (response != null) {
-			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
+		if (response != null) {//如果响应不为空
+			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());//如果请求方法是Head或者get（安全的请求方法）
 			if (this.notModified) {
 				response.setStatus(isHttpGetOrHead ?
 						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());

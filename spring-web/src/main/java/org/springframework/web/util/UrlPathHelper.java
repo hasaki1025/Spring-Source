@@ -196,8 +196,8 @@ public class UrlPathHelper {
 	 * @since 5.3
 	 */
 	public String resolveAndCacheLookupPath(HttpServletRequest request) {
-		String lookupPath = getLookupPathForRequest(request);
-		request.setAttribute(PATH_ATTRIBUTE, lookupPath);
+		String lookupPath = getLookupPathForRequest(request);//解析请求路径
+		request.setAttribute(PATH_ATTRIBUTE, lookupPath);//设置org.springframework.web.util.UrlPathHelper.PATH属性为路径信息
 		return lookupPath;
 	}
 
@@ -245,12 +245,12 @@ public class UrlPathHelper {
 	 * @see #getPathWithinApplication
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
-		String pathWithinApp = getPathWithinApplication(request);
-		// Always use full path within current servlet context?
-		if (this.alwaysUseFullPath || skipServletPathDetermination(request)) {
+		String pathWithinApp = getPathWithinApplication(request);//获取请求路径
+		//总是在当前servlet上下文中使用完整路径?
+		if (this.alwaysUseFullPath || skipServletPathDetermination(request)) {//跳过Servlet路径确定或者永远使用全路径
 			return pathWithinApp;
 		}
-		// Else, use path within current servlet mapping if applicable
+		// 否则，如果适用，使用当前servlet映射中的路径
 		String rest = getPathWithinServletMapping(request, pathWithinApp);
 		if (StringUtils.hasLength(rest)) {
 			return rest;
@@ -349,10 +349,10 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
-		String contextPath = getContextPath(request);
-		String requestUri = getRequestUri(request);
-		String path = getRemainingPath(requestUri, contextPath, true);
-		if (path != null) {
+		String contextPath = getContextPath(request);//获取Context路径（项目路径）
+		String requestUri = getRequestUri(request);//获取URI(不包含参数信息)
+		String path = getRemainingPath(requestUri, contextPath, true);//将给定的“mapping”与“requestUri”的开头匹配，如果匹配，则返回额外的部分。这个方法是必需的，因为HttpServletRequest返回的上下文路径和servlet路径与requestUri不同，去掉了分号内容。
+		if (path != null) {//如果path为null则返回‘/’
 			// Normal case: URI contains context path.
 			return (StringUtils.hasText(path) ? path : "/");
 		}

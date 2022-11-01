@@ -71,21 +71,21 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
-		HandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);
+		HandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);//查找合适的返回值处理器
 		if (handler == null) {
 			throw new IllegalArgumentException("Unknown return value type: " + returnType.getParameterType().getName());
 		}
-		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);//处理返回值
 	}
 
 	@Nullable
 	private HandlerMethodReturnValueHandler selectHandler(@Nullable Object value, MethodParameter returnType) {
-		boolean isAsyncValue = isAsyncReturnValue(value, returnType);
-		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
-			if (isAsyncValue && !(handler instanceof AsyncHandlerMethodReturnValueHandler)) {
+		boolean isAsyncValue = isAsyncReturnValue(value, returnType);//如果含有异步返回值的处理器则使用该处理器判断当前返回值是否是异步返回值
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {//遍历所有返回值处理器
+			if (isAsyncValue && !(handler instanceof AsyncHandlerMethodReturnValueHandler)) {//如果是异步返回值但是该处理器不是异步处理器则跳过
 				continue;
 			}
-			if (handler.supportsReturnType(returnType)) {
+			if (handler.supportsReturnType(returnType)) {//如果当前该处理器可以处理该类型的返回值则返回该处理器
 				return handler;
 			}
 		}

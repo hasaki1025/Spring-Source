@@ -107,11 +107,11 @@ public final class ModelFactory {
 	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
 			throws Exception {
 
-		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
-		container.mergeAttributes(sessionAttributes);
-		invokeModelAttributeMethods(request, container);
+		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);//获取Session中的属性
+		container.mergeAttributes(sessionAttributes);//container和并Session中的属性值
+		invokeModelAttributeMethods(request, container);//ModelAttribute注解修饰的Model方法解析
 
-		for (String name : findSessionAttributeArguments(handlerMethod)) {
+		for (String name : findSessionAttributeArguments(handlerMethod)) {//Session参数
 			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
@@ -129,7 +129,7 @@ public final class ModelFactory {
 	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer container)
 			throws Exception {
 
-		while (!this.modelMethods.isEmpty()) {
+		while (!this.modelMethods.isEmpty()) {//如果modelMethods不是空则进入循环
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
 			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
 			Assert.state(ann != null, "No ModelAttribute annotation");

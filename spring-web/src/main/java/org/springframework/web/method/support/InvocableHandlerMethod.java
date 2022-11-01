@@ -143,11 +143,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
-		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
+		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);//获取和解析参数
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
-		return doInvoke(args);
+		return doInvoke(args);//方法执行
 	}
 
 	/**
@@ -168,15 +168,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
-			args[i] = findProvidedArgument(parameter, providedArgs);
-			if (args[i] != null) {
+			args[i] = findProvidedArgument(parameter, providedArgs);//应该是获取系统参数
+			if (args[i] != null) {//如果是系统参数
 				continue;
 			}
-			if (!this.resolvers.supportsParameter(parameter)) {
+			if (!this.resolvers.supportsParameter(parameter)) {//如果所有解析器都不支持解析该参数类型则抛出异常
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
 			try {
-				args[i] = this.resolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);
+				args[i] = this.resolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);//尝试解析该参数
 			}
 			catch (Exception ex) {
 				// Leave stack trace for later, exception may actually be resolved and handled...
@@ -197,12 +197,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
-		Method method = getBridgedMethod();
+		Method method = getBridgedMethod();//获取桥接方法
 		try {
 			if (KotlinDetector.isSuspendingFunction(method)) {
 				return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 			}
-			return method.invoke(getBean(), args);
+			return method.invoke(getBean(), args);//方法执行
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(method, getBean(), args);
