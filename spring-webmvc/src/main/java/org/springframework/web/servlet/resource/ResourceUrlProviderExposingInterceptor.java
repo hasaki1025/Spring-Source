@@ -50,7 +50,7 @@ public class ResourceUrlProviderExposingInterceptor implements HandlerIntercepto
 			throws Exception {
 
 		try {
-			request.setAttribute(RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+			request.setAttribute(RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);//设置ResourceUrlProvider属性和实现类
 		}
 		catch (ResourceUrlEncodingFilter.LookupPathIndexException ex) {
 			throw new ServletRequestBindingException(ex.getMessage(), ex);

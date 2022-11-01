@@ -377,14 +377,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Override
 	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		String lookupPath = initLookupPath(request);
-		this.mappingRegistry.acquireReadLock();
+		String lookupPath = initLookupPath(request);//获取请求路径（不包含参数信息）
+		this.mappingRegistry.acquireReadLock();//读锁设置
 		try {
-			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);//获取匹配的HandlerMethod（其中包装了Controller的名称，BeanFactory,匹配的Controller的匹配的方法、参数）
+			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);//如果获取合适的HandlerMethod则解析其中Bean并重新创建一个合适的HandlerMethod
 		}
 		finally {
-			this.mappingRegistry.releaseReadLock();
+			this.mappingRegistry.releaseReadLock();//解除读锁
 		}
 	}
 
@@ -398,28 +398,28 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handleNoMatch(Set, String, HttpServletRequest)
 	 */
 	@Nullable
-	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
+	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {//lookupPath为请求路径
 		List<Match> matches = new ArrayList<>();
-		List<T> directPathMatches = this.mappingRegistry.getMappingsByDirectPath(lookupPath);
+		List<T> directPathMatches = this.mappingRegistry.getMappingsByDirectPath(lookupPath);//从缓存中获取该路径的匹配
 		if (directPathMatches != null) {
-			addMatchingMappings(directPathMatches, matches, request);
+			addMatchingMappings(directPathMatches, matches, request);//将匹配的路径信息包装为RequestPathInfo类并放入matches集合中
 		}
-		if (matches.isEmpty()) {
-			addMatchingMappings(this.mappingRegistry.getRegistrations().keySet(), matches, request);
+		if (matches.isEmpty()) {//如果没有匹配的路径
+			addMatchingMappings(this.mappingRegistry.getRegistrations().keySet(), matches, request);//提取出所有路径进行匹配
 		}
 		if (!matches.isEmpty()) {
-			Match bestMatch = matches.get(0);
-			if (matches.size() > 1) {
-				Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
-				matches.sort(comparator);
-				bestMatch = matches.get(0);
+			Match bestMatch = matches.get(0);//获取第一个匹配的路径（暂时为最合适的路径）
+			if (matches.size() > 1) {//如果有多个
+				Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));//获取比较器
+				matches.sort(comparator);//排序
+				bestMatch = matches.get(0);//获取最合适的路径
 				if (logger.isTraceEnabled()) {
 					logger.trace(matches.size() + " matching mappings: " + matches);
 				}
-				if (CorsUtils.isPreFlightRequest(request)) {
+				if (CorsUtils.isPreFlightRequest(request)) {//如果该请求是跨域请求的前置请求（Option类型）
 					for (Match match : matches) {
-						if (match.hasCorsConfig()) {
-							return PREFLIGHT_AMBIGUOUS_MATCH;
+						if (match.hasCorsConfig()) {//如果该请求含有跨域请求配置
+							return PREFLIGHT_AMBIGUOUS_MATCH;//返回指定handlerMethod（专用与跨域请求）
 						}
 					}
 				}
@@ -434,8 +434,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					}
 				}
 			}
-			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.getHandlerMethod());
-			handleMatch(bestMatch.mapping, lookupPath, request);
+			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.getHandlerMethod());//设置org.springframework.web.servlet.HandlerMapping.bestMatchingHandler属性为匹配路径的中的MappingRegistration的HandlerMethod
+			handleMatch(bestMatch.mapping, lookupPath, request);//设置org.springframework.web.servlet.HandlerMapping.pathWithinHandlerMapping属性为路径
 			return bestMatch.getHandlerMethod();
 		}
 		else {
@@ -445,9 +445,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
 		for (T mapping : mappings) {
-			T match = getMatchingMapping(mapping, request);
+			T match = getMatchingMapping(mapping, request);//如果该映射匹配使用RequestMappingInfo包装该路径
 			if (match != null) {
-				matches.add(new Match(match, this.mappingRegistry.getRegistrations().get(mapping)));
+				matches.add(new Match(match, this.mappingRegistry.getRegistrations().get(mapping)));//添加到matches中
 			}
 		}
 	}
@@ -595,7 +595,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 */
 		@Nullable
 		public List<T> getMappingsByDirectPath(String urlPath) {
-			return this.pathLookup.get(urlPath);
+			return this.pathLookup.get(urlPath);//pathLookup是一个Map<String,T>,其中保存了所有请求路径URI
 		}
 
 		/**

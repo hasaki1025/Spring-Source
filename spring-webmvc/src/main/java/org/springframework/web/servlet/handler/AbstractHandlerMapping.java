@@ -495,25 +495,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-		Object handler = getHandlerInternal(request);
+		Object handler = getHandlerInternal(request);//获取匹配的HandlerMethod或者HandlerExecutionChain或者String
 		if (handler == null) {
-			handler = getDefaultHandler();
+			handler = getDefaultHandler();//使用默认的HandlerMethod
 		}
 		if (handler == null) {
 			return null;
 		}
 		// Bean name or resolved handler?
-		if (handler instanceof String) {
+		if (handler instanceof String) {//handler只是类名则从容器中获取
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
-		// Ensure presence of cached lookupPath for interceptors and others
-		if (!ServletRequestPathUtils.hasCachedPath(request)) {
+		// 确保存在拦截器和其他缓存的lookupath
+		if (!ServletRequestPathUtils.hasCachedPath(request)) {//如果缓存中没有被解析请求路径则解析路径
 			initLookupPath(request);
 		}
 
-		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);//获取执行链（不会覆盖之前的执行链）
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Mapped to " + handler);
@@ -522,16 +522,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 
-		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {//如果有跨域配置
 			CorsConfiguration config = getCorsConfiguration(handler, request);
 			if (getCorsConfigurationSource() != null) {
-				CorsConfiguration globalConfig = getCorsConfigurationSource().getCorsConfiguration(request);
+				CorsConfiguration globalConfig = getCorsConfigurationSource().getCorsConfiguration(request);//获取全局CORS配置
 				config = (globalConfig != null ? globalConfig.combine(config) : config);
 			}
 			if (config != null) {
 				config.validateAllowCredentials();
 			}
-			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
+			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);//获取CORS配置的执行链
 		}
 
 		return executionChain;
@@ -569,14 +569,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.3
 	 */
 	protected String initLookupPath(HttpServletRequest request) {
-		if (usesPathPatterns()) {
-			request.removeAttribute(UrlPathHelper.PATH_ATTRIBUTE);
-			RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
+		if (usesPathPatterns()) {//含有路径解析器
+			request.removeAttribute(UrlPathHelper.PATH_ATTRIBUTE);//移除org.springframework.web.util.UrlPathHelper.PATH属性
+			RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);//获取之前解析过并缓存的请求路径（缓存在org.springframework.web.util.ServletRequestPathUtils.PATH属性中）
 			String lookupPath = requestPath.pathWithinApplication().value();
-			return UrlPathHelper.defaultInstance.removeSemicolonContent(lookupPath);
+			return UrlPathHelper.defaultInstance.removeSemicolonContent(lookupPath);//删除分号内容
 		}
 		else {
-			return getUrlPathHelper().resolveAndCacheLookupPath(request);
+			return getUrlPathHelper().resolveAndCacheLookupPath(request);//解析请求路径并放入Request中的org.springframework.web.util.ServletRequestPathUtils.PATH属性中
 		}
 	}
 
@@ -602,16 +602,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
-				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
+				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));//如果返回的是HandlerExecutionChain则不变如果不是则创建一个HandlerExecutionChain用于包装Handler
 
-		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
-			if (interceptor instanceof MappedInterceptor) {
+		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {//遍历适应拦截器集合
+			if (interceptor instanceof MappedInterceptor) {//如果是MappedInterceptor则
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
-				if (mappedInterceptor.matches(request)) {
+				if (mappedInterceptor.matches(request)) {//如果该拦截器适配该请求则添加到执行链中
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}
 			}
-			else {
+			else {//不是MappedInterceptor不用校验直接添加
 				chain.addInterceptor(interceptor);
 			}
 		}

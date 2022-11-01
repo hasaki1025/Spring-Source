@@ -113,7 +113,7 @@ public class SessionAttributesHandler {
 	 */
 	public void storeAttributes(WebRequest request, Map<String, ?> attributes) {
 		attributes.forEach((name, value) -> {
-			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {
+			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {//如果含有该属性名称则存储该属性
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
 		});

@@ -107,11 +107,11 @@ public final class ModelFactory {
 	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
 			throws Exception {
 
-		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
-		container.mergeAttributes(sessionAttributes);
-		invokeModelAttributeMethods(request, container);
+		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);//获取Session中的属性
+		container.mergeAttributes(sessionAttributes);//container和并Session中的属性值
+		invokeModelAttributeMethods(request, container);//ModelAttribute注解修饰的Model方法解析
 
-		for (String name : findSessionAttributeArguments(handlerMethod)) {
+		for (String name : findSessionAttributeArguments(handlerMethod)) {//Session参数
 			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
@@ -129,7 +129,7 @@ public final class ModelFactory {
 	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer container)
 			throws Exception {
 
-		while (!this.modelMethods.isEmpty()) {
+		while (!this.modelMethods.isEmpty()) {//如果modelMethods不是空则进入循环
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
 			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
 			Assert.state(ann != null, "No ModelAttribute annotation");
@@ -199,14 +199,14 @@ public final class ModelFactory {
 	 */
 	public void updateModel(NativeWebRequest request, ModelAndViewContainer container) throws Exception {
 		ModelMap defaultModel = container.getDefaultModel();
-		if (container.getSessionStatus().isComplete()){
+		if (container.getSessionStatus().isComplete()){//如果当前Session结束则清除所有Session中的属性配置
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
-		else {
+		else {//Session没有结束则存储该Model
 			this.sessionAttributesHandler.storeAttributes(request, defaultModel);
 		}
-		if (!container.isRequestHandled() && container.getModel() == defaultModel) {
-			updateBindingResult(request, defaultModel);
+		if (!container.isRequestHandled() && container.getModel() == defaultModel) {//请求没有在处理程序中完全处理且container中的model为默认的model
+			updateBindingResult(request, defaultModel);//更新数据绑定
 		}
 	}
 
@@ -214,7 +214,7 @@ public final class ModelFactory {
 	 * Add {@link BindingResult} attributes to the model for attributes that require it.
 	 */
 	private void updateBindingResult(NativeWebRequest request, ModelMap model) throws Exception {
-		List<String> keyNames = new ArrayList<>(model.keySet());
+		List<String> keyNames = new ArrayList<>(model.keySet());//获取Model的属性
 		for (String name : keyNames) {
 			Object value = model.get(name);
 			if (value != null && isBindingCandidate(name, value)) {

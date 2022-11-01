@@ -60,22 +60,22 @@ public final class MethodIntrospector {
 		Set<Class<?>> handlerTypes = new LinkedHashSet<>();
 		Class<?> specificHandlerType = null;
 
-		if (!Proxy.isProxyClass(targetType)) {
-			specificHandlerType = ClassUtils.getUserClass(targetType);
+		if (!Proxy.isProxyClass(targetType)) {//Controller是否是代理类，如果是则获取原生的Class并放入handlerTypes中
+			specificHandlerType = ClassUtils.getUserClass(targetType);//动态代理是需要特殊处理的类型（specificHandlerType为代理类原生的Class）
 			handlerTypes.add(specificHandlerType);
 		}
-		handlerTypes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetType));
+		handlerTypes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetType));//获取Controller所有接口并放入handlerTypes
 
-		for (Class<?> currentHandlerType : handlerTypes) {
-			final Class<?> targetClass = (specificHandlerType != null ? specificHandlerType : currentHandlerType);
+		for (Class<?> currentHandlerType : handlerTypes) {//遍历handlerTypes
+			final Class<?> targetClass = (specificHandlerType != null ? specificHandlerType : currentHandlerType);//如果代理类的Class不为空则targetClass为代理类
 
 			ReflectionUtils.doWithMethods(currentHandlerType, method -> {
-				Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-				T result = metadataLookup.inspect(specificMethod);
+				Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);//获取该Method（非public方法需要特殊处理）
+				T result = metadataLookup.inspect(specificMethod);//执行传入的metadataLookup的inspect方法（在DispacthServlet中该方法是检查该方法上是否含有InitBinder注解，如果有则返回true否则返回null，该注解具体使用可参考https://blog.csdn.net/qq_40837310/article/details/106984709）
 				if (result != null) {
-					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-					if (bridgedMethod == specificMethod || metadataLookup.inspect(bridgedMethod) == null) {
-						methodMap.put(specificMethod, result);
+					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);//找到桥接方法
+					if (bridgedMethod == specificMethod || metadataLookup.inspect(bridgedMethod) == null) {//桥接方法和指定方法相同或者桥接方法inspect得到的为null（按照上面的也即是不含有InitBinder方法）
+						methodMap.put(specificMethod, result);//放入methodMap中
 					}
 				}
 			}, ReflectionUtils.USER_DECLARED_METHODS);

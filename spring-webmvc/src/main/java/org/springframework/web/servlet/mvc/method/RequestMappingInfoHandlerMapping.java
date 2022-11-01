@@ -120,12 +120,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	@Override
 	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		request.removeAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		request.removeAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);//移除org.springframework.web.servlet.HandlerMapping.producibleMediaTypes属性值
 		try {
 			return super.getHandlerInternal(request);
 		}
 		finally {
-			ProducesRequestCondition.clearMediaTypesAttribute(request);
+			ProducesRequestCondition.clearMediaTypesAttribute(request);//删除org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.MEDIA_TYPES属性
 		}
 	}
 

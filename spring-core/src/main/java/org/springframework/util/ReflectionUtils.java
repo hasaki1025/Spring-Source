@@ -354,28 +354,28 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 */
 	public static void doWithMethods(Class<?> clazz, MethodCallback mc, @Nullable MethodFilter mf) {
-		if (mf == USER_DECLARED_METHODS && clazz == Object.class) {
+		if (mf == USER_DECLARED_METHODS && clazz == Object.class) {//跳过Object类
 			// nothing to introspect
 			return;
 		}
-		Method[] methods = getDeclaredMethods(clazz, false);
-		for (Method method : methods) {
-			if (mf != null && !mf.matches(method)) {
+		Method[] methods = getDeclaredMethods(clazz, false);//获取当前定义的所有方法
+		for (Method method : methods) {//遍历所有定义方法
+			if (mf != null && !mf.matches(method)) {//不匹配则跳过该方法（这里的实现是该方法不是合成方法不是桥接方法且父类不是Object）
 				continue;
 			}
 			try {
-				mc.doWith(method);
+				mc.doWith(method);//桥接方法校验
 			}
 			catch (IllegalAccessException ex) {
 				throw new IllegalStateException("Not allowed to access method '" + method.getName() + "': " + ex);
 			}
 		}
-		// Keep backing up the inheritance hierarchy.
-		if (clazz.getSuperclass() != null && (mf != USER_DECLARED_METHODS || clazz.getSuperclass() != Object.class)) {
-			doWithMethods(clazz.getSuperclass(), mc, mf);
+		// 继续备份继承层次结构。
+		if (clazz.getSuperclass() != null && (mf != USER_DECLARED_METHODS || clazz.getSuperclass() != Object.class)) {//如果含有父类且MethodFilter不是USER_DECLARED_METHODS或者该类的父类不是Object
+			doWithMethods(clazz.getSuperclass(), mc, mf);//父类再次寻找合适的方法
 		}
 		else if (clazz.isInterface()) {
-			for (Class<?> superIfc : clazz.getInterfaces()) {
+			for (Class<?> superIfc : clazz.getInterfaces()) {//如果该类是接口则检查所有接口方法
 				doWithMethods(superIfc, mc, mf);
 			}
 		}

@@ -72,8 +72,8 @@ public abstract class ServletRequestPathUtils {
 	 * Return a {@link #parseAndCache  previously} parsed and cached {@code RequestPath}.
 	 * @throws IllegalArgumentException if not found
 	 */
-	public static RequestPath getParsedRequestPath(ServletRequest request) {
-		RequestPath path = (RequestPath) request.getAttribute(PATH_ATTRIBUTE);
+	public static RequestPath getParsedRequestPath(ServletRequest request) {//返回先前解析和缓存的RequestPath。
+		RequestPath path = (RequestPath) request.getAttribute(PATH_ATTRIBUTE);//获取org.springframework.web.util.ServletRequestPathUtils.PATH属性(之前解析过的)
 		Assert.notNull(path, () -> "Expected parsed RequestPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return path;
 	}
@@ -174,8 +174,8 @@ public abstract class ServletRequestPathUtils {
 	 * @return whether a pre-resolved or pre-parsed path is available
 	 */
 	public static boolean hasCachedPath(ServletRequest request) {
-		return (request.getAttribute(PATH_ATTRIBUTE) != null ||
-				request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) != null);
+		return (request.getAttribute(PATH_ATTRIBUTE) != null ||//org.springframework.web.util.ServletRequestPathUtils.PATH
+				request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) != null);//org.springframework.web.util.UrlPathHelper.PATH
 	}
 
 

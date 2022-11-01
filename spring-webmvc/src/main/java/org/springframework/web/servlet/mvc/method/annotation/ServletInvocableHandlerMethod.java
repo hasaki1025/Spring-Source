@@ -114,17 +114,17 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
-		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
-		setResponseStatus(webRequest);
+		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);//方法执行
+		setResponseStatus(webRequest);//如果HandlerMethod中含有响应的状态码则设置Response中的status
 
-		if (returnValue == null) {
+		if (returnValue == null) {//返回为空
 			if (isRequestNotModified(webRequest) || getResponseStatus() != null || mavContainer.isRequestHandled()) {
 				disableContentCachingIfNecessary(webRequest);
 				mavContainer.setRequestHandled(true);
 				return;
 			}
 		}
-		else if (StringUtils.hasText(getResponseStatusReason())) {
+		else if (StringUtils.hasText(getResponseStatusReason())) {//如果含有相关的响应状态原因(如果有的话)
 			mavContainer.setRequestHandled(true);
 			return;
 		}
@@ -133,7 +133,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		Assert.state(this.returnValueHandlers != null, "No return value handlers");
 		try {
 			this.returnValueHandlers.handleReturnValue(
-					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
+					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);//解析返回值
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
@@ -147,12 +147,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */
 	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
-		HttpStatus status = getResponseStatus();
-		if (status == null) {
+		HttpStatus status = getResponseStatus();//从MethodHandler中获取响应状态
+		if (status == null) {//如果响应状态码为null则返回
 			return;
 		}
 
-		HttpServletResponse response = webRequest.getResponse();
+		HttpServletResponse response = webRequest.getResponse();//此时HandlerMethod中含有响应的状态码，获取Response并设置状态码
 		if (response != null) {
 			String reason = getResponseStatusReason();
 			if (StringUtils.hasText(reason)) {

@@ -149,7 +149,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
-		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
+		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);//获取ServletConfig中的初始化参数
 		if (!pvs.isEmpty()) {
 			try {
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);//使用BeanWrapper包装当前Servlet
@@ -216,7 +216,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		 * @throws ServletException if any required properties are missing
 		 */
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
-				throws ServletException {
+				throws ServletException {//获取ServletConfig中的初始化参数
 
 			Set<String> missingProps = (!CollectionUtils.isEmpty(requiredProperties) ?
 					new HashSet<>(requiredProperties) : null);
